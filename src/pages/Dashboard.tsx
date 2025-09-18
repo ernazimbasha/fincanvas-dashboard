@@ -33,19 +33,6 @@ export default function Dashboard() {
   const seedMarketData = useMutation(api.seedData.seedMarketData);
   const seedUserPortfolio = useMutation(api.seedData.seedUserPortfolio);
 
-  // Redirect if not authenticated
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
-  }
-
   // Seed data on first load
   useEffect(() => {
     const seedData = async () => {
@@ -66,6 +53,19 @@ export default function Dashboard() {
       seedData();
     }
   }, [user, marketIndices, positions, seedMarketData, seedUserPortfolio]);
+
+  // Redirect if not authenticated
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
 
   const handleSignOut = async () => {
     try {
