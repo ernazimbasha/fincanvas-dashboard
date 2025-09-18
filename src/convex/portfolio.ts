@@ -176,3 +176,17 @@ export const placeDemoTrade = mutation({
     }
   },
 });
+
+export const adjustCashBuyingPower = mutation({
+  args: { amount: v.number() },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("User not authenticated");
+
+    const current = user.cashBuyingPower || 0;
+    const updated = current + args.amount;
+
+    await ctx.db.patch(user._id as Id<"users">, { cashBuyingPower: updated });
+    return updated;
+  },
+});

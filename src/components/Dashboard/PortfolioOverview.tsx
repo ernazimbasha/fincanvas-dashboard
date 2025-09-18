@@ -41,6 +41,9 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
   const [balanceOpen, setBalanceOpen] = useState(false);
   const [researchOpen, setResearchOpen] = useState(false);
 
+  // Add selected amount for Fund modal
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+
   // Trade form state
   const [tradeSide, setTradeSide] = useState<"buy" | "sell">("buy");
   const [tradeSymbol, setTradeSymbol] = useState("AAPL");
@@ -49,6 +52,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
   const [tradePrice, setTradePrice] = useState(175);
 
   const placeTrade = useMutation(api.portfolio.placeDemoTrade);
+  const adjustCash = useMutation(api.portfolio.adjustCashBuyingPower);
 
   return (
     <motion.div
@@ -152,10 +156,36 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
           <div className="space-y-3 text-sm">
             <div className="text-white/70">Add funds to your account (demo).</div>
             <div className="grid grid-cols-2 gap-3">
-              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">+$100</button>
-              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">+$500</button>
+              <button
+                className={`rounded-md py-2 ${selectedAmount === 100 ? "bg-emerald-600" : "bg-white/10 hover:bg-white/20"}`}
+                onClick={() => setSelectedAmount(100)}
+              >
+                +$100
+              </button>
+              <button
+                className={`rounded-md py-2 ${selectedAmount === 500 ? "bg-emerald-600" : "bg-white/10 hover:bg-white/20"}`}
+                onClick={() => setSelectedAmount(500)}
+              >
+                +$500
+              </button>
             </div>
-            <button className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2">Confirm</button>
+            <button
+              className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2 disabled:opacity-50"
+              disabled={!selectedAmount}
+              onClick={async () => {
+                try {
+                  const amount = selectedAmount ?? 0;
+                  await adjustCash({ amount });
+                  toast.success(`Successfully added $${amount.toFixed(2)} to your account`);
+                  setFundOpen(false);
+                  setSelectedAmount(null);
+                } catch (e) {
+                  toast.error("Failed to add funds");
+                }
+              }}
+            >
+              Confirm
+            </button>
           </div>
         </DialogContent>
       </Dialog>
