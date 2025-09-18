@@ -14,6 +14,7 @@ import {
   Filler,
 } from "chart.js";
 import { useState } from "react";
+import type { ChartOptions } from "chart.js";
 
 ChartJS.register(
   CategoryScale,
@@ -46,8 +47,22 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     { label: "YTD", value: "YTD" },
   ];
 
+  // Derive subset per time range for real interactivity
+  const derivedData = (() => {
+    if (!data || data.length === 0) return [];
+    const byRangeCount: Record<string, number> = {
+      "1D": 24,
+      "5D": 5,
+      "1M": 22,
+      "3M": 66,
+      "YTD": Math.min(data.length, 180),
+    };
+    const count = byRangeCount[timeRange] ?? data.length;
+    return data.slice(-count);
+  })();
+
   const chartData = {
-    labels: data.map(item => {
+    labels: derivedData.map(item => {
       const date = new Date(item.timestamp);
       return timeRange === "1D" 
         ? date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -56,7 +71,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     datasets: [
       {
         label: "Portfolio Value",
-        data: data.map(item => item.totalValue),
+        data: derivedData.map(item => item.totalValue),
         borderColor: "rgb(16, 185, 129)",
         backgroundColor: "rgba(16, 185, 129, 0.1)",
         borderWidth: 2,
@@ -71,9 +86,10 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: { duration: 400, easing: "easeInOutQuad" },
     plugins: {
       legend: {
         display: false,
@@ -88,7 +104,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         displayColors: false,
         callbacks: {
           title: (context: any) => {
-            const date = new Date(data[context[0].dataIndex].timestamp);
+            const date = new Date(derivedData[context[0].dataIndex].timestamp);
             return date.toLocaleDateString('en-US', { 
               weekday: 'short', 
               year: 'numeric', 
@@ -98,8 +114,8 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
           },
           label: (context: any) => {
             const value = context.parsed.y;
-            const change = data[context.dataIndex].dayChange;
-            const changePercent = data[context.dataIndex].dayChangePercent;
+            const change = derivedData[context.dataIndex].dayChange;
+            const changePercent = derivedData[context.dataIndex].dayChangePercent;
             return [
               `Portfolio Value: $${value.toLocaleString()}`,
               `Day Change: ${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`
@@ -113,7 +129,9 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         display: true,
         grid: {
           color: "rgba(255, 255, 255, 0.1)",
-          drawBorder: false,
+        },
+        border: {
+          display: false,
         },
         ticks: {
           color: "rgba(255, 255, 255, 0.6)",
@@ -124,7 +142,9 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         display: true,
         grid: {
           color: "rgba(255, 255, 255, 0.1)",
-          drawBorder: false,
+        },
+        border: {
+          display: false,
         },
         ticks: {
           color: "rgba(255, 255, 255, 0.6)",
@@ -134,12 +154,12 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     },
     interaction: {
       intersect: false,
-      mode: 'index' as const,
+      mode: 'index',
     },
   };
 
-  const currentValue = data[data.length - 1]?.totalValue || 0;
-  const previousValue = data[data.length - 2]?.totalValue || currentValue;
+  const currentValue = derivedData[derivedData.length - 1]?.totalValue || 0;
+  const previousValue = derivedData[derivedData.length - 2]?.totalValue || currentValue;
   const change = currentValue - previousValue;
   const changePercent = previousValue > 0 ? (change / previousValue) * 100 : 0;
 
@@ -184,7 +204,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="h-64">
-            <Line data={chartData} options={options} />
+            <Line key={timeRange} data={chartData} options={options} />
           </div>
         </CardContent>
       </Card>

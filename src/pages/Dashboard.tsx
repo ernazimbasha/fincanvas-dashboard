@@ -68,6 +68,10 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string; price: number; change: number }>>([]);
 
+  // New: learning hub modal + selected symbol for candlestick
+  const [learningOpen, setLearningOpen] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState<string>("AAPL");
+
   // Dummy market list for search
   const demoUniverse: Array<{ symbol: string; name: string; price: number; change: number }> = [
     { symbol: "AAPL", name: "Apple Inc.", price: 171.62, change: -0.55 },
@@ -246,6 +250,36 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Learning Hub Modal */}
+      <Dialog open={learningOpen} onOpenChange={setLearningOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Learning Hub</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Candlestick Basics</div>
+              <div className="text-white/70">5 min • Understand open, high, low, close and common patterns.</div>
+              <a href="https://www.investopedia.com/terms/c/candlestick.asp" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Risk-Adjusted Returns</div>
+              <div className="text-white/70">8 min • Sharpe ratio and how to compare strategies fairly.</div>
+              <a href="https://www.investopedia.com/terms/s/sharperatio.asp" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Portfolio Diversification</div>
+              <div className="text-white/70">6 min • Why correlation matters and how to spread risk.</div>
+              <a href="https://www.investopedia.com/terms/d/diversification.asp" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Quick Video: Trend Following</div>
+              <a href="https://www.youtube.com/results?search_query=trend+following+basics" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Watch on YouTube</a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Search Section */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -332,7 +366,7 @@ export default function Dashboard() {
           
           {/* Candlestick Chart */}
           <div className="lg:col-span-1">
-            <CandlestickChart symbol="AAPL" />
+            <CandlestickChart symbol={selectedSymbol} />
           </div>
         </div>
 
@@ -354,7 +388,11 @@ export default function Dashboard() {
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full"
-                  onClick={() => setShowAnalysis((s) => !s)}
+                  onClick={() => {
+                    setShowAnalysis((s) => !s);
+                    setSelectedSymbol("MSFT");
+                    toast.success("AI analysis generated for MSFT (demo) and chart updated.");
+                  }}
                 >
                   {showAnalysis ? "Hide Insight" : "Analyze"}
                 </Button>
@@ -416,7 +454,14 @@ export default function Dashboard() {
                 <li>• Portfolio Diversification (6 min)</li>
               </ul>
               <div className="pt-2">
-                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">Start Learning</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={() => setLearningOpen(true)}
+                >
+                  Start Learning
+                </Button>
               </div>
             </CardContent>
           </Card>

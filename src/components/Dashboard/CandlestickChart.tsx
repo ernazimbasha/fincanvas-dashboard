@@ -19,37 +19,48 @@ export function CandlestickChart({ symbol = "AAPL" }: CandlestickChartProps) {
     { label: "All", value: "All" },
   ];
 
-  // Mock candlestick data
-  const generateCandlestickData = () => {
+  // Regenerate candles based on timeRange for real interactivity
+  const candlestickData = (() => {
+    // points per range
+    const pointsByRange: Record<string, number> = {
+      "1D": 50,   // intraday-style
+      "1M": 50,
+      "3M": 60,
+      "6M": 90,
+      "1Y": 120,
+      "All": 150,
+    };
+    const numPoints = pointsByRange[timeRange] ?? 50;
     const data = [];
     let basePrice = 170;
-    
-    for (let i = 0; i < 50; i++) {
-      const open = basePrice + (Math.random() - 0.5) * 4;
-      const close = open + (Math.random() - 0.5) * 6;
-      const high = Math.max(open, close) + Math.random() * 3;
-      const low = Math.min(open, close) - Math.random() * 3;
-      
+
+    for (let i = 0; i < numPoints; i++) {
+      // vary volatility a bit by range
+      const vol = timeRange === "1D" ? 3 : timeRange === "1M" ? 4 : timeRange === "3M" ? 5 : timeRange === "6M" ? 6 : timeRange === "1Y" ? 7 : 8;
+      const open = basePrice + (Math.random() - 0.5) * vol;
+      const close = open + (Math.random() - 0.5) * (vol + 1);
+      const high = Math.max(open, close) + Math.random() * (vol / 2 + 1);
+      const low = Math.min(open, close) - Math.random() * (vol / 2 + 1);
+
       data.push({
-        time: Date.now() - (49 - i) * 24 * 60 * 60 * 1000,
+        time: Date.now() - (numPoints - 1 - i) * 24 * 60 * 60 * 1000,
         open,
         high,
         low,
         close,
         volume: Math.floor(Math.random() * 1000000) + 500000,
       });
-      
+
       basePrice = close;
     }
-    
-    return data;
-  };
 
-  const candlestickData = generateCandlestickData();
+    return data;
+  })();
+
   const currentPrice = candlestickData[candlestickData.length - 1];
-  const previousPrice = candlestickData[candlestickData.length - 2];
+  const previousPrice = candlestickData[candlestickData.length - 2] ?? currentPrice;
   const change = currentPrice.close - previousPrice.close;
-  const changePercent = (change / previousPrice.close) * 100;
+  const changePercent = previousPrice.close ? (change / previousPrice.close) * 100 : 0;
 
   // Simple candlestick visualization
   const CandlestickSVG = () => {
@@ -143,9 +154,16 @@ export function CandlestickChart({ symbol = "AAPL" }: CandlestickChartProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-48 flex items-center justify-center">
+          {/* Smooth fade on timeRange change */}
+          <motion.div
+            key={timeRange}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            className="h-48 flex items-center justify-center"
+          >
             <CandlestickSVG />
-          </div>
+          </motion.div>
           <div className="mt-4 grid grid-cols-4 gap-4 text-xs">
             <div>
               <p className="text-white/60">Open</p>
