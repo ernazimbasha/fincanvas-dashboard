@@ -16,6 +16,7 @@ import {
   Target,
   Lightbulb
 } from "lucide-react";
+import { useMemo } from "react";
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
@@ -29,13 +30,40 @@ export default function Landing() {
     }
   };
 
+  // Add: lightweight ticker data (mock, no backend dependency)
+  const tickerItems = useMemo(
+    () => [
+      { symbol: "AAPL", price: 171.62, change: -0.55 },
+      { symbol: "MSFT", price: 417.30, change: +0.30 },
+      { symbol: "TSLA", price: 248.50, change: -0.12 },
+      { symbol: "GOOGL", price: 139.17, change: -0.80 },
+      { symbol: "NVDA", price: 901.12, change: +1.15 },
+      { symbol: "^GSPC", price: 4783.45, change: -0.26 },
+      { symbol: "^IXIC", price: 15055.65, change: +0.30 },
+      { symbol: "^DJI", price: 37863.8, change: -0.15 },
+    ],
+    []
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.3),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,119,198,0.3),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(120,219,226,0.2),transparent_50%)]" />
-      
+      {/* Background Elements with slight motion pulse */}
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.3),transparent_50%)]"
+        animate={{ opacity: [0.6, 0.8, 0.6] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,119,198,0.3),transparent_50%)]"
+        animate={{ opacity: [0.4, 0.6, 0.4] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(120,219,226,0.2),transparent_50%)]"
+        animate={{ opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+
       {/* Navigation */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
@@ -83,6 +111,28 @@ export default function Landing() {
         </div>
       </motion.nav>
 
+      {/* Live Ticker Bar */}
+      <div className="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-md">
+        <div className="overflow-hidden">
+          <motion.div
+            className="flex gap-8 py-2"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          >
+            {[...tickerItems, ...tickerItems].map((t, i) => (
+              <div key={`${t.symbol}-${i}`} className="flex items-center gap-2 min-w-fit">
+                <span className="text-xs text-white/70">{t.symbol}</span>
+                <span className="text-xs text-white/90">${t.price.toFixed(2)}</span>
+                <span className={`text-xs ${t.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {t.change >= 0 ? "+" : ""}
+                  {t.change.toFixed(2)}%
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-7xl mx-auto text-center">
@@ -102,88 +152,87 @@ export default function Landing() {
               </span>
               <br />
               <span className="text-3xl md:text-4xl font-semibold">
-                (Guaranteed Winner)
+                — Smarter Finance, Interactive Insights.
               </span>
             </h1>
             
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Draw your trading ideas, get AI-powered insights, and collaborate with others. 
-              The future of finance is visual, interactive, and intelligent.
+              Trade with clarity. Explore interactive charts, real-time insights, and an AI assistant built for decision-making.
+              A clean, modern workspace designed for speed, precision, and confidence.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white text-lg px-8 py-4"
+                className="bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white text-lg px-8 py-4 transition-transform active:scale-95"
               >
-                {isAuthenticated ? "Go to Dashboard" : "Start Trading"}
+                {isAuthenticated ? "Go to Dashboard" : "Get Started"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-lg px-8 py-4"
+                onClick={handleGetStarted}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-lg px-8 py-4 transition-transform active:scale-95"
               >
-                Watch Demo
+                Try Demo
               </Button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Problem-Solution Section */}
-      <section className="relative z-10 px-6 py-16">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid md:grid-cols-3 gap-8"
-          >
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 rounded-lg bg-red-500/20">
-                    <Target className="h-6 w-6 text-red-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">Problem</h3>
+      {/* Problem-Solution Section: hide on homepage per brief */}
+      <section className="relative z-10 px-6 py-16 hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid md:grid-cols-3 gap-8"
+        >
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-lg bg-red-500/20">
+                  <Target className="h-6 w-6 text-red-400" />
                 </div>
-                <p className="text-white/70 leading-relaxed">
-                  In 2025's volatile markets (Nifty swings 15% YTD per NSE), 80% Indian retail investors lose money due to confusing charts and generic advice (SEBI report). Big Air's tools lack collaborative, preference-based customization.
-                </p>
-              </CardContent>
-            </Card>
+                <h3 className="text-xl font-bold text-white">Problem</h3>
+              </div>
+              <p className="text-white/70 leading-relaxed">
+                In 2025's volatile markets (Nifty swings 15% YTD per NSE), 80% Indian retail investors lose money due to confusing charts and generic advice (SEBI report). Big Air's tools lack collaborative, preference-based customization.
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 rounded-lg bg-emerald-500/20">
-                    <Lightbulb className="h-6 w-6 text-emerald-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">Solution</h3>
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-lg bg-emerald-500/20">
+                  <Lightbulb className="h-6 w-6 text-emerald-400" />
                 </div>
-                <p className="text-white/70 leading-relaxed">
-                  FinCanvas AI is an AI-native collaborative canvas where users "draw" stock queries (e.g., sketch a trend line), and it generates personalized, interactive charts with predictive insights.
-                </p>
-              </CardContent>
-            </Card>
+                <h3 className="text-xl font-bold text-white">Solution</h3>
+              </div>
+              <p className="text-white/70 leading-relaxed">
+                FinCanvas AI is an AI-native collaborative canvas where users "draw" stock queries (e.g., sketch a trend line), and it generates personalized, interactive charts with predictive insights.
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 rounded-lg bg-purple-500/20">
-                    <Zap className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">MVP Features</h3>
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-lg bg-purple-500/20">
+                  <Zap className="h-6 w-6 text-purple-400" />
                 </div>
-                <p className="text-white/70 leading-relaxed">
-                  Interactive Canvas, Preference Engine, Collab Mode, Risk Alerts, and Analytics Dashboard targeting young Indians (Gen Z finance literacy gap).
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+                <h3 className="text-xl font-bold text-white">MVP Features</h3>
+              </div>
+              <p className="text-white/70 leading-relaxed">
+                Interactive Canvas, Preference Engine, Collab Mode, Risk Alerts, and Analytics Dashboard targeting young Indians (Gen Z finance literacy gap).
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </section>
 
       {/* Features Section */}
