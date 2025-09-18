@@ -17,29 +17,104 @@ export function ChatBot() {
   ]);
   const [inputValue, setInputValue] = useState("");
 
+  // Simple intent-based response engine
+  const getBotReply = (text: string) => {
+    const t = text.trim().toLowerCase();
+
+    // Greetings
+    if (/(^|\b)(hi|hello|hey|yo|howdy)(\b|!|\.|$)/.test(t)) {
+      return "Hi there! 👋 How can I help today? Try asking about your portfolio, a symbol (e.g., AAPL), market news, or how to fund your account.";
+    }
+
+    // Help
+    if (t.includes("help") || t.includes("what can you do")) {
+      return "I can assist with: portfolio summaries, basic symbol lookups (AAPL, MSFT, TSLA), demo funding steps, and quick market context. Ask me something like: \"What's up with NVDA?\" or \"How do I fund?\"";
+    }
+
+    // Funding / Cash
+    if (t.includes("fund") || t.includes("add cash") || t.includes("buying power")) {
+      return "To add demo funds: click Fund → choose an amount → Confirm. Your Cash Buying Power updates instantly. Want tips on how much to fund?";
+    }
+
+    // Portfolio
+    if (t.includes("portfolio") || t.includes("holdings") || t.includes("positions") || t.includes("account value")) {
+      return "Your portfolio shows account value, market value, P/L, and positions. For a quick check, open the dashboard overview. You can also place demo trades to adjust positions.";
+    }
+
+    // Symbol lookups (simple heuristics)
+    const symbolMatch = t.match(/\b[a-z]{1,5}\b/g);
+    const known = ["aapl", "msft", "tsla", "nvda", "amzn", "googl", "spy", "qqq"];
+    if (symbolMatch && symbolMatch.some(s => known.includes(s))) {
+      const sym = symbolMatch.find(s => known.includes(s))!.toUpperCase();
+      const canned: Record<string, string> = {
+        AAPL: "AAPL: Stable mega-cap; watch volume near resistance. Typical pullbacks to 20D MA get bought (demo).",
+        MSFT: "MSFT: Momentum vs sector peers looks healthy; dips have been bought. Earnings drift can be supportive (demo).",
+        TSLA: "TSLA: Elevated volatility; consider sizing and risk controls. Trend can be choppy around catalysts (demo).",
+        NVDA: "NVDA: Leadership tied to AI demand; watch for digestion after strong runs; pullbacks can be constructive (demo).",
+        AMZN: "AMZN: Efficiency + growth narrative; watch margins and AWS commentary (demo).",
+        GOOGL: "GOOGL: Focus on AI monetization and ad spend trends; technicals improving (demo).",
+        SPY: "SPY: Broad market proxy; breadth and sector rotation key. Watch 50/200D MAs (demo).",
+        QQQ: "QQQ: Tech-heavy; moves often correlate with semis momentum and rates (demo).",
+      };
+      return canned[sym] || `${sym}: I can provide a quick demo take—what timeframe are you considering?`;
+    }
+
+    // News
+    if (t.includes("news") || t.includes("headline") || t.includes("market")) {
+      return "Market snapshot (demo): Tech leadership steady; semis firm on AI demand; policy tone cautiously optimistic. Want me to open the News Feed modal?";
+    }
+
+    // Trade
+    if (t.includes("buy") || t.includes("sell") || t.includes("trade") || t.includes("order")) {
+      return "To place a demo trade: open Trade → set Side, Symbol, Qty, and Price → Submit. I can also suggest a mock entry if you share a symbol.";
+    }
+
+    // Education
+    if (t.includes("learn") || t.includes("education") || t.includes("how to")) {
+      return "Learning Hub has quick reads on candlesticks, risk-adjusted returns, and more. Want me to open the Learning modal?";
+    }
+
+    // Appreciation
+    if (t.includes("thanks") || t.includes("thank you") || t.includes("ty")) {
+      return "You're welcome! Anything else I can help with?";
+    }
+
+    // Who are you
+    if (t.includes("who are you") || t.includes("what are you")) {
+      return "I'm the FinCanvas AI assistant—here to guide you with quick insights, portfolio context, and demo workflows.";
+    }
+
+    // Default
+    return "Got it. Could you clarify whether you're asking about your portfolio, a specific symbol, funding, news, or learning resources?";
+  };
+
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
 
-    const newMessage = {
+    const userText = inputValue;
+    const userMessage = {
       id: messages.length + 1,
-      text: inputValue,
+      text: userText,
       isBot: false,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputValue("");
 
-    // Simulate bot response
+    // Simulate typing delay, then respond based on intent
     setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: "I understand you're asking about market analysis. Based on your portfolio, I can see you have positions in AAPL, TSLA, and MSFT. Would you like me to analyze any specific trends or provide insights on these holdings?",
-        isBot: true,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+      const reply = getBotReply(userText);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: reply,
+          isBot: true,
+          timestamp: new Date(),
+        },
+      ]);
+    }, 600);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
