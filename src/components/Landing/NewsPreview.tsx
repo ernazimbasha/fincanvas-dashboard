@@ -3,37 +3,42 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Badge } from "@/components/ui/badge";
 
 export function NewsPreview() {
   // Demo articles with robust images; any failure falls back to placeholder
   const items = [
     {
       title: "AI Hits New Stride in Finance",
-      img: "https://images.unsplash.com/photo-1551281044-8a99eafc7b9f?q=80&w=1200&auto=format&fit=crop",
+      img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1600&auto=format&fit=crop",
       blurb: "Analysts see AI accelerating research workflows across desks.",
       full:
         "AI in finance is rapidly evolving, enhancing research productivity across sell-side and buy-side desks. From NLP document parsing to predictive modeling, teams leverage AI to streamline processes and extract timely insights.",
+      category: "AI & Quant",
     },
     {
       title: "Semiconductors Lead Markets",
-      img: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200&auto=format&fit=crop",
+      img: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1600&auto=format&fit=crop",
       blurb: "Chipmakers drive indices higher on strong demand.",
       full:
         "Global chip demand remains resilient amid AI infrastructure builds and edge computing. Leading GPU providers continue to see upward revisions while supply chains gradually normalize.",
+      category: "Markets",
     },
     {
       title: "Macro Watch: Rates & Growth",
-      img: "https://images.unsplash.com/photo-1542228262-3d663b306a95?q=80&w=1200&auto=format&fit=crop",
+      img: "https://images.unsplash.com/photo-1604594849809-dfedbc827105?q=80&w=1600&auto=format&fit=crop",
       blurb: "Investors eye central bank commentary and GDP forecasts.",
       full:
         "Markets are focused on upcoming policy commentary and growth prints. Risk assets are balancing soft-landing expectations with inflation persistence, prompting selective sector leadership.",
+      category: "Macro",
     },
     {
       title: "Earnings Season: Key Trends",
-      img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1200&auto=format&fit=crop",
+      img: "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=1600&auto=format&fit=crop",
       blurb: "Beat-and-raise cycles broaden across large cap tech.",
       full:
         "With earnings beats widening, guidance is trending positive in software and AI-linked hardware. Margin discipline and efficient growth remain dominant investor themes.",
+      category: "Earnings",
     },
   ];
 
@@ -66,20 +71,32 @@ export function NewsPreview() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
             >
-              <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors overflow-hidden h-full">
+              <Card className="group bg-white/5 border-white/10 hover:bg-white/10 transition-colors overflow-hidden h-full">
                 <AspectRatio ratio={16 / 9}>
-                  <img
-                    src={n.img}
-                    alt={n.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      const target = e.currentTarget as HTMLImageElement;
-                      if (target.src !== placeholder) {
-                        target.src = placeholder;
-                      }
-                    }}
-                  />
+                  <div className="relative h-full w-full">
+                    <img
+                      src={n.img}
+                      alt={n.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (target.src !== placeholder) {
+                          target.src = placeholder;
+                        }
+                      }}
+                    />
+                    {/* Gradient overlay for depth */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                    {/* Category badge */}
+                    {("category" in n) && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-emerald-600/80 text-white backdrop-blur-sm">
+                          {(n as any).category}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                 </AspectRatio>
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="text-white font-semibold mb-1">{n.title}</div>
