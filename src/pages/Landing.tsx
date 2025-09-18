@@ -120,12 +120,14 @@ export default function Landing() {
             <Button
               variant="ghost"
               className="text-white hover:bg-white/10"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Features
             </Button>
             <Button
               variant="ghost"
               className="text-white hover:bg-white/10"
+              onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
             >
               About
             </Button>
@@ -364,7 +366,7 @@ export default function Landing() {
       <NewsPreview />
 
       {/* Why FinCanvas / Testimonials */}
-      <section className="relative z-10 px-6 py-16">
+      <section id="features" className="relative z-10 px-6 py-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -438,7 +440,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-md">
+      <footer id="about" className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             {/* Brand */}
