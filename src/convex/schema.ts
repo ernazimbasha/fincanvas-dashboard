@@ -52,7 +52,8 @@ const schema = defineSchema(
       totalGainLoss: v.number(),
       todayGainLossPercent: v.number(),
       totalGainLossPercent: v.number(),
-    }).index("by_user", ["userId"]),
+    }).index("by_user", ["userId"])
+      .index("by_user_and_symbol", ["userId", "symbol"]),
 
     // Market data for watchlist and indices
     marketData: defineTable({

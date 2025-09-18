@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface PortfolioOverviewProps {
   data: {
@@ -38,6 +40,15 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
   const [tradeOpen, setTradeOpen] = useState(false);
   const [balanceOpen, setBalanceOpen] = useState(false);
   const [researchOpen, setResearchOpen] = useState(false);
+
+  // Trade form state
+  const [tradeSide, setTradeSide] = useState<"buy" | "sell">("buy");
+  const [tradeSymbol, setTradeSymbol] = useState("AAPL");
+  const [tradeCompany, setTradeCompany] = useState("Apple Inc.");
+  const [tradeQty, setTradeQty] = useState(10);
+  const [tradePrice, setTradePrice] = useState(175);
+
+  const placeTrade = useMutation(api.portfolio.placeDemoTrade);
 
   return (
     <motion.div
@@ -155,16 +166,70 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
             <DialogTitle>Trade Ticket</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
-            <div className="text-white/70">Place a demo order (Buy/Sell).</div>
             <div className="grid grid-cols-2 gap-3">
-              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">Buy</button>
-              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">Sell</button>
+              <button
+                className={`rounded-md py-2 ${tradeSide === "buy" ? "bg-emerald-600" : "bg-white/10 hover:bg-white/20"}`}
+                onClick={() => setTradeSide("buy")}
+              >
+                Buy
+              </button>
+              <button
+                className={`rounded-md py-2 ${tradeSide === "sell" ? "bg-red-600" : "bg-white/10 hover:bg-white/20"}`}
+                onClick={() => setTradeSide("sell")}
+              >
+                Sell
+              </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <input className="rounded-md bg-white/10 border border-white/20 px-3 py-2" placeholder="Symbol (e.g., AAPL)" />
-              <input className="rounded-md bg-white/10 border border-white/20 px-3 py-2" placeholder="Qty (e.g., 10)" />
+              <input
+                className="rounded-md bg-white/10 border border-white/20 px-3 py-2"
+                placeholder="Symbol (e.g., AAPL)"
+                value={tradeSymbol}
+                onChange={(e) => setTradeSymbol(e.target.value.toUpperCase())}
+              />
+              <input
+                className="rounded-md bg-white/10 border border-white/20 px-3 py-2"
+                placeholder="Company (e.g., Apple Inc.)"
+                value={tradeCompany}
+                onChange={(e) => setTradeCompany(e.target.value)}
+              />
             </div>
-            <button className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2">Submit Order</button>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                className="rounded-md bg-white/10 border border-white/20 px-3 py-2"
+                placeholder="Qty (e.g., 10)"
+                value={tradeQty}
+                onChange={(e) => setTradeQty(parseInt(e.target.value || "0", 10))}
+              />
+              <input
+                type="number"
+                className="rounded-md bg-white/10 border border-white/20 px-3 py-2"
+                placeholder="Price (e.g., 175)"
+                value={tradePrice}
+                onChange={(e) => setTradePrice(parseFloat(e.target.value || "0"))}
+              />
+            </div>
+            <button
+              className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2"
+              onClick={async () => {
+                try {
+                  await placeTrade({
+                    symbol: tradeSymbol,
+                    companyName: tradeCompany,
+                    side: tradeSide,
+                    quantity: tradeQty,
+                    price: tradePrice,
+                  });
+                  toast.success(`Order submitted: ${tradeSide.toUpperCase()} ${tradeQty} ${tradeSymbol} @ $${tradePrice}`);
+                  setTradeOpen(false);
+                } catch (e) {
+                  toast.error("Failed to submit order");
+                }
+              }}
+            >
+              Submit Order
+            </button>
           </div>
         </DialogContent>
       </Dialog>

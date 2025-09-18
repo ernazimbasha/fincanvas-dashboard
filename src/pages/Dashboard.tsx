@@ -88,6 +88,11 @@ export default function Dashboard() {
     { symbol: "GOOGL", name: "Alphabet Inc.", price: 139.17, change: -0.80 },
   ];
 
+  const [newsFeedOpen, setNewsFeedOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const generateInsight = useMutation(api.insights.generateDemoInsight);
+
   const runSearch = () => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) {
@@ -286,8 +291,70 @@ export default function Dashboard() {
               <a href="https://www.investopedia.com/terms/d/diversification.asp" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
             </div>
             <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Position Sizing & Risk</div>
+              <div className="text-white/70">7 min • How much to risk per trade; R, Kelly criterion basics.</div>
+              <a href="https://www.investopedia.com/articles/trading/04/091504.asp" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
+              <div className="font-semibold text-white">Mean Reversion vs Momentum</div>
+              <div className="text-white/70">9 min • Two dominant families of strategies and when each shines.</div>
+              <a href="https://www.newyorker.com/business/currency/the-two-faces-of-investing-momentum-and-mean-reversion" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Read Article</a>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3 bg-white/5">
               <div className="font-semibold text-white">Quick Video: Trend Following</div>
               <a href="https://www.youtube.com/results?search_query=trend+following+basics" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline text-xs">Watch on YouTube</a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* News Feed Modal */}
+      <Dialog open={newsFeedOpen} onOpenChange={setNewsFeedOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Market News Feed</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="font-semibold">Tech leads midday; breadth improves</div>
+              <div className="text-white/70">Semis extend gains on AI demand; indices mixed with defensive lag.</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="font-semibold">Fed commentary: cautious optimism</div>
+              <div className="text-white/70">Policy path remains data-dependent; market pricing 1–2 cuts this year.</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="font-semibold">Mega-cap earnings ahead</div>
+              <div className="text-white/70">Watch volume on breakouts; elevated IV into prints.</div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compare Modal */}
+      <Dialog open={compareOpen} onOpenChange={setCompareOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Comparison: AAPL vs XLK (Demo)</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="text-xs text-white/60 mb-2">Relative Performance (1M)</div>
+              <svg width="100%" height="80" viewBox="0 0 220 80" className="opacity-90">
+                <polyline fill="none" stroke="#10b981" strokeWidth="2" points="0,70 20,66 40,62 60,58 80,54 100,50 120,46 140,42 160,38 180,34 200,30 220,28" />
+                <polyline fill="none" stroke="#60a5fa" strokeWidth="2" points="0,72 20,70 40,68 60,66 80,64 100,62 120,60 140,58 160,56 180,54 200,52 220,50" />
+              </svg>
+              <div className="mt-2 text-xs text-white/60">AAPL: +3.2% • XLK: +2.4% (demo)</div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-md bg-white/5 p-2 border border-white/10">
+                <div className="text-white/60">Volatility</div>
+                <div className="text-white font-medium">AAPL: 1.2x</div>
+              </div>
+              <div className="rounded-md bg-white/5 p-2 border border-white/10">
+                <div className="text-white/60">Correlation</div>
+                <div className="text-white font-medium">0.86</div>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -518,7 +585,7 @@ export default function Dashboard() {
                 <li>• AI chip demand lifts semiconductor peers.</li>
               </ul>
               <div className="pt-2">
-                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">View Feed</Button>
+                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setNewsFeedOpen(true)}>View Feed</Button>
               </div>
             </CardContent>
           </Card>
@@ -533,6 +600,8 @@ export default function Dashboard() {
                 <li>• Candlestick Basics (5 min)</li>
                 <li>• Risk-Adjusted Returns (8 min)</li>
                 <li>• Portfolio Diversification (6 min)</li>
+                <li>• Position Sizing & Risk (7 min)</li>
+                <li>• Mean Reversion vs Momentum (9 min)</li>
               </ul>
               <div className="pt-2">
                 <Button
@@ -560,7 +629,16 @@ export default function Dashboard() {
                 <li>• AAPL near resistance; watch volume spikes.</li>
               </ul>
               <div className="pt-2">
-                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full">Generate Insight</Button>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full"
+                  onClick={async () => {
+                    await generateInsight({ symbol: selectedSymbol, severity: "medium" });
+                    toast.success("New AI insight generated");
+                  }}
+                >
+                  Generate Insight
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -577,7 +655,14 @@ export default function Dashboard() {
                 <li>• TSLA vs XLY • 1M: +5.1% vs +1.3%</li>
               </ul>
               <div className="pt-2">
-                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">Compare Now</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={() => setCompareOpen(true)}
+                >
+                  Compare Now
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUser } from "./users";
+import { Id } from "./_generated/dataModel";
 
 export const getPortfolioOverview = query({
   args: {},
@@ -81,5 +82,97 @@ export const getPortfolioHistory = query({
         q.eq("userId", user._id).gte("timestamp", startTime)
       )
       .collect();
+  },
+});
+
+export const placeDemoTrade = mutation({
+  args: {
+    symbol: v.string(),
+    companyName: v.string(),
+    side: v.union(v.literal("buy"), v.literal("sell")),
+    quantity: v.number(),
+    price: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("User not authenticated");
+    if (args.quantity <= 0 || args.price <= 0) throw new Error("Quantity and price must be positive");
+
+    // Try to get existing position by user+symbol
+    const existing = await ctx.db
+      .query("positions")
+      .withIndex("by_user_and_symbol", (q) => q.eq("userId", user._id).eq("symbol", args.symbol))
+      .unique()
+      .catch(() => null);
+
+    if (!existing) {
+      if (args.side === "sell") {
+        // Nothing to sell; no-op for demo
+        return "No existing position to sell";
+      }
+      // Create new position on buy
+      const quantity = args.quantity;
+      const costBasis = args.price; // per share
+      const currentPrice = args.price;
+      const marketValue = currentPrice * quantity;
+
+      await ctx.db.insert("positions", {
+        userId: user._id,
+        symbol: args.symbol,
+        companyName: args.companyName,
+        quantity,
+        costBasis,
+        currentPrice,
+        marketValue,
+        todayGainLoss: 0,
+        totalGainLoss: (currentPrice - costBasis) * quantity,
+        todayGainLossPercent: 0,
+        totalGainLossPercent: costBasis > 0 ? ((currentPrice - costBasis) / costBasis) * 100 : 0,
+      });
+      return "Position created";
+    }
+
+    // Update existing position
+    const prevQty = existing.quantity;
+    const prevCost = existing.costBasis; // per share
+    const price = args.price;
+
+    if (args.side === "buy") {
+      const newQty = prevQty + args.quantity;
+      const newCostBasis = ((prevQty * prevCost) + (args.quantity * price)) / newQty;
+      const currentPrice = price;
+      const marketValue = currentPrice * newQty;
+
+      await ctx.db.patch(existing._id as Id<"positions">, {
+        quantity: newQty,
+        costBasis: newCostBasis,
+        currentPrice,
+        marketValue,
+        totalGainLoss: (currentPrice - newCostBasis) * newQty,
+        totalGainLossPercent: newCostBasis > 0 ? ((currentPrice - newCostBasis) / newCostBasis) * 100 : 0,
+      });
+      return "Position updated (buy)";
+    } else {
+      const sellQty = Math.min(args.quantity, prevQty);
+      const newQty = prevQty - sellQty;
+
+      if (newQty <= 0) {
+        await ctx.db.delete(existing._id as Id<"positions">);
+        return "Position closed";
+      }
+
+      const currentPrice = price;
+      const marketValue = currentPrice * newQty;
+
+      await ctx.db.patch(existing._id as Id<"positions">, {
+        quantity: newQty,
+        // costBasis stays as previous (per-share)
+        currentPrice,
+        marketValue,
+        totalGainLoss: (currentPrice - prevCost) * newQty,
+        totalGainLossPercent: prevCost > 0 ? ((currentPrice - prevCost) / prevCost) * 100 : 0,
+      });
+      return "Position updated (sell)";
+    }
   },
 });
