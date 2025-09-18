@@ -23,6 +23,7 @@ import { EducationHub } from "@/components/Landing/EducationHub";
 import { Testimonials } from "@/components/Landing/Testimonials";
 import { FAQ } from "@/components/Landing/FAQ";
 import { NewsPreview } from "@/components/Landing/NewsPreview";
+import { AnalystInsights } from "@/components/Landing/AnalystInsights";
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
@@ -357,6 +358,7 @@ export default function Landing() {
       <HowItWorks />
       <TrendingStocks />
       <EducationHub />
+      <AnalystInsights />
       <Testimonials />
       <FAQ />
       <NewsPreview />
