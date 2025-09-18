@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function NewsPreview() {
   // Demo articles with robust images; any failure falls back to placeholder
@@ -37,14 +36,12 @@ export function NewsPreview() {
     },
   ];
 
-  const placeholder = "https://source.unsplash.com/400x300/?finance";
+  const placeholder = "https://source.unsplash.com/400x300/?stock,finance,market";
 
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ title: string; full: string } | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const handleOpen = (article: { title: string; full: string }) => {
-    setSelected(article);
-    setOpen(true);
+  const toggleExpand = (index: number) => {
+    setExpandedIndex((prev) => (prev === index ? null : index));
   };
 
   return (
@@ -59,7 +56,7 @@ export function NewsPreview() {
         >
           Blog & News
         </motion.h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {items.map((n, i) => (
             <motion.div
               key={n.title}
@@ -86,29 +83,27 @@ export function NewsPreview() {
                   <Button
                     size="sm"
                     className="bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white"
-                    onClick={() => handleOpen({ title: n.title, full: n.full })}
+                    onClick={() => toggleExpand(i)}
                   >
-                    Read More
+                    {expandedIndex === i ? "Hide" : "Read More"}
                   </Button>
+
+                  {/* Inline expandable full article */}
+                  {expandedIndex === i && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 text-white/80 text-sm leading-relaxed"
+                    >
+                      {n.full}
+                    </motion.div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
       </div>
-
-      {/* Demo Modal for full article */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md">
-          <DialogHeader>
-            <DialogTitle>{selected?.title ?? "Article"}</DialogTitle>
-          </DialogHeader>
-          <div className="text-white/80 text-sm leading-relaxed">
-            {selected?.full ??
-              "Detailed article content is unavailable in demo mode. Please try again later."}
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

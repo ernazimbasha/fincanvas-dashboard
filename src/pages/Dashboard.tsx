@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 // Dashboard Components
 import { PortfolioOverview } from "@/components/Dashboard/PortfolioOverview";
@@ -22,6 +23,7 @@ import { ChatBot } from "@/components/Dashboard/ChatBot";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   // Convex queries
   const portfolioOverview = useQuery(api.portfolio.getPortfolioOverview);
@@ -61,6 +63,33 @@ export default function Dashboard() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<{ title: string; body: string } | null>(null);
 
+  // Add local state for analyze and search
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ symbol: string; name: string; price: number; change: number }>>([]);
+
+  // Dummy market list for search
+  const demoUniverse: Array<{ symbol: string; name: string; price: number; change: number }> = [
+    { symbol: "AAPL", name: "Apple Inc.", price: 171.62, change: -0.55 },
+    { symbol: "MSFT", name: "Microsoft Corp.", price: 417.30, change: +0.30 },
+    { symbol: "TSLA", name: "Tesla, Inc.", price: 248.50, change: -0.12 },
+    { symbol: "NVDA", name: "NVIDIA Corp.", price: 901.12, change: +1.15 },
+    { symbol: "AMZN", name: "Amazon.com, Inc.", price: 178.52, change: +1.19 },
+    { symbol: "GOOGL", name: "Alphabet Inc.", price: 139.17, change: -0.80 },
+  ];
+
+  const runSearch = () => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setSearchResults([]);
+      return;
+    }
+    const results = demoUniverse.filter(
+      (r) => r.symbol.toLowerCase().includes(term) || r.name.toLowerCase().includes(term)
+    );
+    setSearchResults(results.slice(0, 5));
+  };
+
   const notifications = [
     { title: "High Volatility Alert", body: "TSLA volatility increased 8% today. Review risk." },
     { title: "Price Target Update", body: "MSFT consensus target revised to $440." },
@@ -97,6 +126,7 @@ export default function Dashboard() {
     try {
       await signOut();
       toast.success("Signed out successfully");
+      navigate("/");
     } catch (error) {
       toast.error("Failed to sign out");
     }
@@ -216,6 +246,60 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Search Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-white text-base">Search Markets & Companies</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") runSearch();
+                }}
+                placeholder="Search by symbol or company name (e.g., AAPL, Microsoft)"
+                className="flex-1 rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder:text-white/60"
+              />
+              <Button
+                onClick={runSearch}
+                className="bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white"
+              >
+                Search
+              </Button>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {searchResults.map((r) => (
+                  <div
+                    key={r.symbol}
+                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-white font-semibold">{r.symbol}</div>
+                      <div className="text-xs text-white/60">{r.name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-white">${r.price.toFixed(2)}</div>
+                      <div className={`text-xs ${r.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {(r.change >= 0 ? "+" : "") + r.change.toFixed(2)}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Main Content */}
       <main className="relative z-10 p-6 space-y-6">
         {/* Main Dashboard Grid */}
@@ -266,8 +350,39 @@ export default function Dashboard() {
                 <li>MSFT • P/E 35.2 • EPS 9.95</li>
                 <li>TSLA • P/E 58.4 • EPS 4.10</li>
               </ul>
-              <div className="pt-2">
-                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full">Analyze</Button>
+              <div className="pt-2 space-y-3">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full"
+                  onClick={() => setShowAnalysis((s) => !s)}
+                >
+                  {showAnalysis ? "Hide Insight" : "Analyze"}
+                </Button>
+
+                {showAnalysis && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-lg border border-white/10 bg-white/5 p-3"
+                  >
+                    <div className="text-white/90 mb-2">
+                      AI Insight: MSFT shows sustained momentum vs sector peers with improving breadth.
+                      Pullbacks to 20D MA have been bought; risk skews positive into earnings if volume confirms.
+                    </div>
+                    {/* Mini chart (dummy) */}
+                    <svg width="100%" height="60" viewBox="0 0 200 60" className="opacity-90">
+                      <polyline
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="2"
+                        points="0,45 20,40 40,42 60,35 80,30 100,28 120,25 140,22 160,20 180,18 200,15"
+                      />
+                    </svg>
+                    <div className="mt-2 text-xs text-white/60">
+                      Backtest: 6/8 positive weeks; Avg +1.2% over next 10 sessions on similar setups (demo).
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </CardContent>
           </Card>
