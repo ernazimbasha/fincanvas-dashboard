@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export function NewsPreview() {
   // Demo articles with robust images; any failure falls back to placeholder
@@ -36,7 +37,7 @@ export function NewsPreview() {
     },
   ];
 
-  const placeholder = "https://source.unsplash.com/400x300/?stock,finance,market";
+  const placeholder = "https://placehold.co/600x338/png?text=News";
 
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -56,7 +57,7 @@ export function NewsPreview() {
         >
           Blog & News
         </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((n, i) => (
             <motion.div
               key={n.title}
@@ -65,19 +66,22 @@ export function NewsPreview() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
             >
-              <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors overflow-hidden">
-                <img
-                  src={n.img}
-                  alt={n.title}
-                  className="h-36 w-full object-cover"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    if (target.src !== placeholder) {
-                      target.src = placeholder;
-                    }
-                  }}
-                />
-                <CardContent className="p-5">
+              <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors overflow-hidden h-full">
+                <AspectRatio ratio={16 / 9}>
+                  <img
+                    src={n.img}
+                    alt={n.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      if (target.src !== placeholder) {
+                        target.src = placeholder;
+                      }
+                    }}
+                  />
+                </AspectRatio>
+                <CardContent className="p-5 flex flex-col h-full">
                   <div className="text-white font-semibold mb-1">{n.title}</div>
                   <div className="text-white/70 text-sm mb-4">{n.blurb}</div>
                   <Button
