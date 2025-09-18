@@ -12,7 +12,7 @@ export function FAQ() {
   return (
     <section className="relative z-10 px-6 py-16">
       <div className="max-w-3xl mx-auto">
-        <motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">
+        <motion.h2 initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">
           FAQ
         </motion.h2>
         <Accordion type="single" collapsible className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">

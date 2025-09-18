@@ -11,12 +11,12 @@ export function HowItWorks() {
   return (
     <section className="relative z-10 px-6 py-16">
       <div className="max-w-7xl mx-auto">
-        <motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-bold text-white mb-8">
+        <motion.h2 initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5 }} className="text-3xl md:text-4xl font-bold text-white mb-8">
           How It Works
         </motion.h2>
         <div className="grid sm:grid-cols-3 gap-6">
           {steps.map((s, i) => (
-            <motion.div key={s.title} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}>
+            <motion.div key={s.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}>
               <Card className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-colors">
                 <CardContent className="p-6">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-emerald-500 to-purple-600 flex items-center justify-center mb-3">
