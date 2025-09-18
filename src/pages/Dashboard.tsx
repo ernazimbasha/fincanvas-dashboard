@@ -8,6 +8,9 @@ import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 // Dashboard Components
 import { PortfolioOverview } from "@/components/Dashboard/PortfolioOverview";
@@ -53,6 +56,29 @@ export default function Dashboard() {
       seedData();
     }
   }, [user, marketIndices, positions, seedMarketData, seedUserPortfolio]);
+
+  // Add local state for notifications modal
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<{ title: string; body: string } | null>(null);
+
+  const notifications = [
+    { title: "High Volatility Alert", body: "TSLA volatility increased 8% today. Review risk." },
+    { title: "Price Target Update", body: "MSFT consensus target revised to $440." },
+    { title: "Portfolio Milestone", body: "Your portfolio crossed $60k this week. Great job!" },
+  ];
+
+  const openNotification = (n: { title: string; body: string }) => {
+    setSelectedNotification(n);
+    setNotifyOpen(true);
+  };
+
+  const handleProfileClick = (action: "profile" | "settings" | "signout") => {
+    if (action === "signout") {
+      handleSignOut();
+      return;
+    }
+    toast.info(action === "profile" ? "Profile is coming soon (demo)" : "Settings are coming soon (demo)");
+  };
 
   // Redirect if not authenticated
   if (isLoading) {
@@ -112,37 +138,83 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10 relative"
-            >
-              <Bell className="h-4 w-4" />
-              {unreadAlertsCount && unreadAlertsCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
-                  {unreadAlertsCount}
-                </span>
-              )}
-            </Button>
+            {/* Notifications dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 relative"
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadAlertsCount && unreadAlertsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-[10px] leading-3 flex items-center justify-center text-white">
+                      {unreadAlertsCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {notifications.map((n, i) => (
+                  <DropdownMenuItem key={i} onClick={() => openNotification(n)}>
+                    {n.title}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => toast("All caught up!")}>
+                  View all
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Settings button keeps behavior */}
             <Button
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10"
+              onClick={() => toast.info("Settings panel coming soon (demo)")}
             >
               <Settings className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10"
-              onClick={handleSignOut}
-            >
-              <User className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+
+            {/* Profile dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>{user?.name || "Trader"}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileClick("profile")}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileClick("settings")}>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileClick("signout")}>Sign out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </motion.header>
+
+      {/* Notifications Modal */}
+      <Dialog open={notifyOpen} onOpenChange={setNotifyOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>{selectedNotification?.title || "Notification"}</DialogTitle>
+          </DialogHeader>
+          <div className="text-white/80">
+            {selectedNotification?.body}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
       <main className="relative z-10 p-6 space-y-6">

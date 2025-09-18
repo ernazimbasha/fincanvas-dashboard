@@ -17,6 +17,12 @@ import {
   Lightbulb
 } from "lucide-react";
 import { useMemo } from "react";
+import { HowItWorks } from "@/components/Landing/HowItWorks";
+import { TrendingStocks } from "@/components/Landing/TrendingStocks";
+import { EducationHub } from "@/components/Landing/EducationHub";
+import { Testimonials } from "@/components/Landing/Testimonials";
+import { FAQ } from "@/components/Landing/FAQ";
+import { NewsPreview } from "@/components/Landing/NewsPreview";
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
@@ -346,6 +352,14 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* New rich content sections */}
+      <HowItWorks />
+      <TrendingStocks />
+      <EducationHub />
+      <Testimonials />
+      <FAQ />
+      <NewsPreview />
 
       {/* Why FinCanvas / Testimonials */}
       <section className="relative z-10 px-6 py-16">

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, DollarSign, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface PortfolioOverviewProps {
   data: {
@@ -98,6 +99,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
               <Button 
                 size="sm" 
                 className="flex-1 bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white border-0"
+                onClick={() => toast.success("Funds added (demo)")}
               >
                 <DollarSign className="h-4 w-4 mr-1" />
                 Fund
@@ -106,6 +108,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
                 size="sm" 
                 variant="outline" 
                 className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => toast.success("Trade submitted (demo)")}
               >
                 <Briefcase className="h-4 w-4 mr-1" />
                 Trade
@@ -115,6 +118,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
               size="sm" 
               variant="outline" 
               className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+              onClick={() => toast.info("Balance fetched (demo)")}
             >
               Balance
             </Button>
