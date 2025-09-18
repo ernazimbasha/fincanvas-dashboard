@@ -481,17 +481,6 @@ export default function Landing() {
             <p className="text-white/60 text-xs">
               © {new Date().getFullYear()} FinCanvas AI. All rights reserved.
             </p>
-            <p className="text-white/60 text-xs">
-              Powered by{" "}
-              <a
-                href="https://vly.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-400 hover:text-emerald-300 transition-colors"
-              >
-                vly.ai
-              </a>
-            </p>
           </div>
         </div>
       </footer>

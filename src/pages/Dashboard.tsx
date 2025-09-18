@@ -7,6 +7,7 @@ import { ArrowLeft, Bell, Settings, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Dashboard Components
 import { PortfolioOverview } from "@/components/Dashboard/PortfolioOverview";
@@ -15,7 +16,6 @@ import { MarketView } from "@/components/Dashboard/MarketView";
 import { PositionsTable } from "@/components/Dashboard/PositionsTable";
 import { CandlestickChart } from "@/components/Dashboard/CandlestickChart";
 import { ChatBot } from "@/components/Dashboard/ChatBot";
-import { ProjectSummary } from "@/components/Dashboard/ProjectSummary";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user, signOut } = useAuth();
@@ -179,6 +179,96 @@ export default function Dashboard() {
             <CandlestickChart symbol="AAPL" />
           </div>
         </div>
+
+        {/* Research & Insights Section */}
+        <section className="mt-6 grid grid-cols-1 xl:grid-cols-5 gap-6">
+          {/* Company Research */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-base">Company Research</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-white/70 space-y-2">
+              <p>Fundamentals, ratios, and profiles for top holdings.</p>
+              <ul className="list-disc ml-4 space-y-1">
+                <li>AAPL • P/E 28.1 • EPS 6.42</li>
+                <li>MSFT • P/E 35.2 • EPS 9.95</li>
+                <li>TSLA • P/E 58.4 • EPS 4.10</li>
+              </ul>
+              <div className="pt-2">
+                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full">Analyze</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Market News */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-base">Market News</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-white/70 space-y-2">
+              <ul className="space-y-2">
+                <li>• Tech leads market rebound; indices mixed.</li>
+                <li>• Fed commentary signals cautious optimism.</li>
+                <li>• AI chip demand lifts semiconductor peers.</li>
+              </ul>
+              <div className="pt-2">
+                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">View Feed</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Learning Hub */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-base">Learning Hub</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-white/70 space-y-2">
+              <ul className="space-y-2">
+                <li>• Candlestick Basics (5 min)</li>
+                <li>• Risk-Adjusted Returns (8 min)</li>
+                <li>• Portfolio Diversification (6 min)</li>
+              </ul>
+              <div className="pt-2">
+                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">Start Learning</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Analyst Insights */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-base">Analyst Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-white/70 space-y-2">
+              <p className="text-white/80">AI-generated alerts and predictions:</p>
+              <ul className="space-y-1">
+                <li>• TSLA volatility rising — consider position sizing.</li>
+                <li>• MSFT momentum strong vs sector peers.</li>
+                <li>• AAPL near resistance; watch volume spikes.</li>
+              </ul>
+              <div className="pt-2">
+                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white w-full">Generate Insight</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Comparison Tool */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-base">Comparison Tool</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-white/70 space-y-2">
+              <p>Compare stocks vs sector benchmarks.</p>
+              <ul className="space-y-1">
+                <li>• AAPL vs XLK • 1M: +3.2% vs +2.4%</li>
+                <li>• TSLA vs XLY • 1M: +5.1% vs +1.3%</li>
+              </ul>
+              <div className="pt-2">
+                <Button size="sm" variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">Compare Now</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
       </main>
 
       {/* ChatBot */}
