@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, DollarSign, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface PortfolioOverviewProps {
   data: {
@@ -31,6 +33,11 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
   const formatPercent = (value: number) => {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
+
+  const [fundOpen, setFundOpen] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [balanceOpen, setBalanceOpen] = useState(false);
+  const [researchOpen, setResearchOpen] = useState(false);
 
   return (
     <motion.div
@@ -99,7 +106,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
               <Button 
                 size="sm" 
                 className="flex-1 bg-gradient-to-r from-emerald-500 to-purple-600 hover:from-emerald-600 hover:to-purple-700 text-white border-0"
-                onClick={() => toast.success("Funds added (demo)")}
+                onClick={() => setFundOpen(true)}
               >
                 <DollarSign className="h-4 w-4 mr-1" />
                 Fund
@@ -108,7 +115,7 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
                 size="sm" 
                 variant="outline" 
                 className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                onClick={() => toast.success("Trade submitted (demo)")}
+                onClick={() => setTradeOpen(true)}
               >
                 <Briefcase className="h-4 w-4 mr-1" />
                 Trade
@@ -118,13 +125,81 @@ export function PortfolioOverview({ data }: PortfolioOverviewProps) {
               size="sm" 
               variant="outline" 
               className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-              onClick={() => toast.info("Balance fetched (demo)")}
+              onClick={() => setBalanceOpen(true)}
             >
               Balance
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={fundOpen} onOpenChange={setFundOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Fund Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="text-white/70">Add funds to your account (demo).</div>
+            <div className="grid grid-cols-2 gap-3">
+              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">+$100</button>
+              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">+$500</button>
+            </div>
+            <button className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2">Confirm</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={tradeOpen} onOpenChange={setTradeOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Trade Ticket</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="text-white/70">Place a demo order (Buy/Sell).</div>
+            <div className="grid grid-cols-2 gap-3">
+              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">Buy</button>
+              <button className="rounded-md bg-white/10 hover:bg-white/20 py-2">Sell</button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input className="rounded-md bg-white/10 border border-white/20 px-3 py-2" placeholder="Symbol (e.g., AAPL)" />
+              <input className="rounded-md bg-white/10 border border-white/20 px-3 py-2" placeholder="Qty (e.g., 10)" />
+            </div>
+            <button className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2">Submit Order</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={balanceOpen} onOpenChange={setBalanceOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md">
+          <DialogHeader>
+            <DialogTitle>Balance Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span>Cash:</span><span>$10,000.00</span></div>
+            <div className="flex justify-between"><span>Buying Power:</span><span>$20,000.00</span></div>
+            <div className="flex justify-between"><span>Margin Available:</span><span>$8,000.00</span></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={researchOpen} onOpenChange={setResearchOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Research Summary</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="text-white/80">
+              AI Research (demo): Large-cap tech breadth improving; pullbacks to 20D MA have been bought. Risk skew positive if volume confirms.
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="text-xs text-white/60 mb-2">Relative Performance (Demo)</div>
+              <svg width="100%" height="80" viewBox="0 0 220 80" className="opacity-90">
+                <polyline fill="none" stroke="#10b981" strokeWidth="2" points="0,70 20,65 40,60 60,58 80,50 100,48 120,45 140,40 160,35 180,30 200,28 220,25" />
+              </svg>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

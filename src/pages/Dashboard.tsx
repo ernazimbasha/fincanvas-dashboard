@@ -72,6 +72,12 @@ export default function Dashboard() {
   const [learningOpen, setLearningOpen] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<string>("AAPL");
 
+  // Add state for Settings/Profile and Search detail modal
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [searchDetailOpen, setSearchDetailOpen] = useState(false);
+  const [selectedSearch, setSelectedSearch] = useState<{ symbol: string; name: string; price: number; change: number } | null>(null);
+
   // Dummy market list for search
   const demoUniverse: Array<{ symbol: string; name: string; price: number; change: number }> = [
     { symbol: "AAPL", name: "Apple Inc.", price: 171.62, change: -0.55 },
@@ -110,7 +116,14 @@ export default function Dashboard() {
       handleSignOut();
       return;
     }
-    toast.info(action === "profile" ? "Profile is coming soon (demo)" : "Settings are coming soon (demo)");
+    if (action === "profile") {
+      setProfileOpen(true);
+      return;
+    }
+    if (action === "settings") {
+      setSettingsOpen(true);
+      return;
+    }
   };
 
   // Redirect if not authenticated
@@ -156,7 +169,7 @@ export default function Dashboard() {
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10"
-              onClick={() => window.history.back()}
+              onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -280,6 +293,73 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-md">
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Dark Mode</span>
+              <span className="rounded-md bg-white/10 px-2 py-1 text-xs">Enabled</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Notifications</span>
+              <span className="rounded-md bg-white/10 px-2 py-1 text-xs">On</span>
+            </div>
+            <div className="text-white/60 text-xs">Demo settings. Changes are not persisted.</div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Profile Dialog */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-md">
+          <DialogHeader>
+            <DialogTitle>Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Name</span>
+              <span className="text-white/80">{user?.name || "Trader"}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Email</span>
+              <span className="text-white/80">{user?.email || "demo@fincanvas.ai"}</span>
+            </div>
+            <button className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2">Manage Subscription</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Detail Dialog */}
+      <Dialog open={searchDetailOpen} onOpenChange={setSearchDetailOpen}>
+        <DialogContent className="bg-slate-900/90 text-white border-white/10 backdrop-blur-md max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selectedSearch?.symbol} — {selectedSearch?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Last Price</span>
+              <span>${selectedSearch?.price.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Change</span>
+              <span className={selectedSearch && selectedSearch.change >= 0 ? "text-emerald-400" : "text-red-400"}>
+                {(selectedSearch ? (selectedSearch.change >= 0 ? "+" : "") + selectedSearch.change.toFixed(2) : "")}%
+              </span>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+              <div className="text-xs text-white/60 mb-2">Trend (Demo)</div>
+              <svg width="100%" height="60" viewBox="0 0 200 60" className="opacity-90">
+                <polyline fill="none" stroke="#10b981" strokeWidth="2" points="0,45 20,43 40,42 60,40 80,38 100,35 120,32 140,28 160,25 180,22 200,20" />
+              </svg>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Search Section */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -314,7 +394,8 @@ export default function Dashboard() {
                 {searchResults.map((r) => (
                   <div
                     key={r.symbol}
-                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between"
+                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={() => { setSelectedSearch(r); setSearchDetailOpen(true); }}
                   >
                     <div>
                       <div className="text-white font-semibold">{r.symbol}</div>
