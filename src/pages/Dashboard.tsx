@@ -146,9 +146,6 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="relative z-10 p-6 space-y-6">
-        {/* Project Summary */}
-        <ProjectSummary />
-        
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
           {/* Portfolio Overview */}

@@ -45,6 +45,28 @@ export default function Landing() {
     []
   );
 
+  // Add: Live Market Snapshot mock data
+  const marketSnapshot = useMemo(
+    () => ({
+      indices: [
+        { symbol: "^GSPC", name: "S&P 500", price: 4783.45, change: -12.37, changePercent: -0.26 },
+        { symbol: "^DJI", name: "Dow Jones", price: 37863.80, change: -57.44, changePercent: -0.15 },
+        { symbol: "^IXIC", name: "NASDAQ", price: 15055.65, change: +45.12, changePercent: +0.30 },
+      ],
+      gainers: [
+        { symbol: "NVDA", name: "NVIDIA", price: 901.12, change: +10.35, changePercent: +1.15 },
+        { symbol: "MSFT", name: "Microsoft", price: 417.30, change: +1.25, changePercent: +0.30 },
+        { symbol: "AMZN", name: "Amazon", price: 178.52, change: +2.10, changePercent: +1.19 },
+      ],
+      losers: [
+        { symbol: "AAPL", name: "Apple", price: 171.62, change: -0.95, changePercent: -0.55 },
+        { symbol: "TSLA", name: "Tesla", price: 248.50, change: -0.31, changePercent: -0.12 },
+        { symbol: "GOOGL", name: "Alphabet", price: 139.17, change: -1.12, changePercent: -0.80 },
+      ],
+    }),
+    []
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
       {/* Background Elements with slight motion pulse */}
@@ -183,123 +205,188 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Problem-Solution Section: hide on homepage per brief */}
-      <section className="relative z-10 px-6 py-16 hidden">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid md:grid-cols-3 gap-8"
-        >
-          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-red-500/20">
-                  <Target className="h-6 w-6 text-red-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Problem</h3>
-              </div>
-              <p className="text-white/70 leading-relaxed">
-                In 2025's volatile markets (Nifty swings 15% YTD per NSE), 80% Indian retail investors lose money due to confusing charts and generic advice (SEBI report). Big Air's tools lack collaborative, preference-based customization.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-emerald-500/20">
-                  <Lightbulb className="h-6 w-6 text-emerald-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Solution</h3>
-              </div>
-              <p className="text-white/70 leading-relaxed">
-                FinCanvas AI is an AI-native collaborative canvas where users "draw" stock queries (e.g., sketch a trend line), and it generates personalized, interactive charts with predictive insights.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-purple-500/20">
-                  <Zap className="h-6 w-6 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white">MVP Features</h3>
-              </div>
-              <p className="text-white/70 leading-relaxed">
-                Interactive Canvas, Preference Engine, Collab Mode, Risk Alerts, and Analytics Dashboard targeting young Indians (Gen Z finance literacy gap).
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
+      {/* Live Market Snapshot Section */}
       <section className="relative z-10 px-6 py-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center mb-12"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mb-8"
           >
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Powerful Features for Modern Traders
-            </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Everything you need to make informed trading decisions with AI-powered insights
+            <h2 className="text-4xl font-bold text-white mb-3">Live Market Snapshot</h2>
+            <p className="text-white/70">
+              Track key indices and movers at a glance
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Indices */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="space-y-3"
+            >
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Indices</h3>
+                    <Badge className="bg-white/10 text-white/70">Market</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {marketSnapshot.indices.map((idx, i) => (
+                      <motion.div
+                        key={idx.symbol}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
+                        className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-white">{idx.name}</p>
+                          <p className="text-xs text-white/60">{idx.symbol.replace('^', '')}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-white">${idx.price.toLocaleString()}</p>
+                          <p className={`text-xs ${idx.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {(idx.change >= 0 ? '+' : '') + idx.change.toFixed(2)} ({(idx.changePercent >= 0 ? '+' : '') + idx.changePercent.toFixed(2)}%)
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Top Gainers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="space-y-3"
+            >
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Top Gainers</h3>
+                    <Badge className="bg-emerald-500/20 text-emerald-300">Bullish</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {marketSnapshot.gainers.map((s, i) => (
+                      <motion.div
+                        key={s.symbol}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.12 + i * 0.05 }}
+                        className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <div>
+                            <p className="text-sm font-medium text-white">{s.symbol}</p>
+                            <p className="text-xs text-white/60">{s.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-white">${s.price.toFixed(2)}</p>
+                          <p className="text-xs text-emerald-400">
+                            +{s.change.toFixed(2)} (+{s.changePercent.toFixed(2)}%)
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Top Losers */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="space-y-3"
+            >
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Top Losers</h3>
+                    <Badge className="bg-red-500/20 text-red-300">Bearish</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {marketSnapshot.losers.map((s, i) => (
+                      <motion.div
+                        key={s.symbol}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.14 + i * 0.05 }}
+                        className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-red-400" />
+                          <div>
+                            <p className="text-sm font-medium text-white">{s.symbol}</p>
+                            <p className="text-xs text-white/60">{s.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-white">${s.price.toFixed(2)}</p>
+                          <p className="text-xs text-red-400">
+                            {s.change.toFixed(2)} ({s.changePercent.toFixed(2)}%)
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why FinCanvas / Testimonials */}
+      <section className="relative z-10 px-6 py-16">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">Why FinCanvas?</h2>
+            <p className="text-white/70 max-w-2xl mx-auto">
+              Professional-grade tools, AI-powered insights, and a frictionless experience built for modern traders.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: Brain,
-                title: "AI-Powered Analysis",
-                description: "Get personalized insights based on your trading style and risk tolerance"
+                title: "Interactive Canvas",
+                text: "Sketch trends, annotate charts, and explore patterns with AI-assisted overlays.",
               },
               {
-                icon: TrendingUp,
-                title: "Interactive Charts",
-                description: "Draw your ideas directly on charts and get AI-generated predictions"
+                title: "Risk Alerts",
+                text: "Stay ahead with volatility alerts, bias checks, and position risk flags.",
               },
               {
-                icon: Users,
-                title: "Collaborative Trading",
-                description: "Share canvases and brainstorm with other traders in real-time"
+                title: "Collaborative Whiteboard",
+                text: "Share ideas with your team in real time and build smarter strategies together.",
               },
-              {
-                icon: Shield,
-                title: "Risk Management",
-                description: "Automated alerts for biases and volatility with trade plan validation"
-              },
-              {
-                icon: BarChart3,
-                title: "Portfolio Analytics",
-                description: "Monitor your performance with detailed analytics and insights"
-              },
-              {
-                icon: Zap,
-                title: "Real-time Data",
-                description: "Live market data and instant notifications for your watchlist"
-              }
-            ].map((feature, index) => (
+            ].map((item, i) => (
               <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
+                key={item.title}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                transition={{ duration: 0.4, delay: 0.25 + i * 0.1 }}
               >
                 <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl hover:bg-white/10 transition-all duration-300 h-full">
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-3 rounded-lg bg-gradient-to-r from-emerald-500/20 to-purple-500/20">
-                        <feature.icon className="h-6 w-6 text-emerald-400" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
-                    </div>
-                    <p className="text-white/70">{feature.description}</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                    <p className="text-white/70">{item.text}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -336,9 +423,10 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 bg-white/5 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center gap-3 mb-4 md:mb-0">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            {/* Brand */}
+            <div className="flex items-center gap-3">
               <img
                 src="./logo.svg"
                 alt="FinCanvas AI"
@@ -346,9 +434,54 @@ export default function Landing() {
                 height={32}
                 className="rounded-lg"
               />
-              <span className="text-white font-semibold">FinCanvas AI</span>
+              <div>
+                <span className="text-white font-semibold block">FinCanvas AI</span>
+                <span className="text-xs text-white/60">Smarter Finance, Interactive Insights</span>
+              </div>
             </div>
-            <p className="text-white/60 text-sm">
+
+            {/* Quick Links */}
+            <div className="text-white/70 text-sm">
+              <p className="font-semibold text-white mb-2">Quick Links</p>
+              <div className="flex gap-4">
+                <button
+                  className="hover:text-white transition-colors"
+                  onClick={() => navigate('/auth')}
+                >
+                  Get Started
+                </button>
+                <button
+                  className="hover:text-white transition-colors"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Dashboard
+                </button>
+                <a
+                  href="https://vly.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  vly.ai
+                </a>
+              </div>
+            </div>
+
+            {/* Contact + Disclaimer */}
+            <div className="text-white/70 text-sm">
+              <p className="font-semibold text-white mb-2">Contact</p>
+              <p>Email: support@fincanvas.ai</p>
+              <p className="mt-3 text-xs text-white/50">
+                Disclaimer: For educational purposes only. Not investment advice. Markets involve risk.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between">
+            <p className="text-white/60 text-xs">
+              © {new Date().getFullYear()} FinCanvas AI. All rights reserved.
+            </p>
+            <p className="text-white/60 text-xs">
               Powered by{" "}
               <a
                 href="https://vly.ai"
