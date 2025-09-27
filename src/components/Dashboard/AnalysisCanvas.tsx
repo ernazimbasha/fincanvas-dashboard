@@ -143,8 +143,11 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
     const y = e.clientY - rect.top;
 
     // Support both internal drag (from suggestions) and external drag (from chart)
-    const symbolFromDnD = e.dataTransfer.getData('text/symbol');
-    const symbolToAdd = draggedTicker || (symbolFromDnD ? symbolFromDnD.toUpperCase() : null);
+    const rawSymbolFromCustom = e.dataTransfer.getData('text/symbol');
+    const rawSymbolFromPlain = e.dataTransfer.getData('text/plain');
+    const symbolFromDnD = (rawSymbolFromCustom || rawSymbolFromPlain || '').toUpperCase().trim();
+
+    const symbolToAdd = draggedTicker || (symbolFromDnD ? symbolFromDnD : null);
     if (!symbolToAdd) return;
 
     const symbolData = MOCK_SYMBOLS.find(s => s.symbol === symbolToAdd);

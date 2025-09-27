@@ -119,6 +119,29 @@ function generateSeries(timeframe: Timeframe, n: number, startPrice = 170): Cand
   return out;
 }
 
+// Add helper to set drag data in multiple formats
+const setDragData = (e: React.DragEvent, sym: string) => {
+  try {
+    e.dataTransfer.setData("text/symbol", sym);
+    e.dataTransfer.setData("text/plain", sym); // fallback for broader browser support
+    const dragEl = document.createElement("div");
+    dragEl.style.width = "100px";
+    dragEl.style.height = "24px";
+    dragEl.style.background = "rgba(99,102,241,0.9)";
+    dragEl.style.color = "white";
+    dragEl.style.display = "flex";
+    dragEl.style.alignItems = "center";
+    dragEl.style.justifyContent = "center";
+    dragEl.style.borderRadius = "6px";
+    dragEl.style.fontSize = "12px";
+    dragEl.style.fontWeight = "600";
+    dragEl.textContent = `Chart: ${sym}`;
+    document.body.appendChild(dragEl);
+    e.dataTransfer.setDragImage(dragEl, 50, 12);
+    setTimeout(() => document.body.removeChild(dragEl), 0);
+  } catch {}
+};
+
 export function InteractiveStockChart({
   symbol,
   timeframe,
@@ -248,6 +271,15 @@ export function InteractiveStockChart({
             </div>
             <div className="flex items-center gap-2">
               <span className="hidden sm:inline text-[11px] text-white/60 mr-1">Drag to Canvas</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-xs text-white/70 hover:text-white hover:bg-white/10"
+                draggable
+                onDragStart={(e) => setDragData(e, symbol)}
+              >
+                Drag {symbol}
+              </Button>
               {tfButtons.map((t) => (
                 <Button
                   key={t.value}
@@ -275,27 +307,7 @@ export function InteractiveStockChart({
             onMouseUp={onMouseUp}
             onMouseLeave={onMouseUp}
             draggable
-            onDragStart={(e) => {
-              try {
-                e.dataTransfer.setData("text/symbol", symbol);
-                // optional: set a lightweight drag preview
-                const dragEl = document.createElement("div");
-                dragEl.style.width = "100px";
-                dragEl.style.height = "24px";
-                dragEl.style.background = "rgba(99,102,241,0.9)";
-                dragEl.style.color = "white";
-                dragEl.style.display = "flex";
-                dragEl.style.alignItems = "center";
-                dragEl.style.justifyContent = "center";
-                dragEl.style.borderRadius = "6px";
-                dragEl.style.fontSize = "12px";
-                dragEl.style.fontWeight = "600";
-                dragEl.textContent = `Chart: ${symbol}`;
-                document.body.appendChild(dragEl);
-                e.dataTransfer.setDragImage(dragEl, 50, 12);
-                setTimeout(() => document.body.removeChild(dragEl), 0);
-              } catch {}
-            }}
+            onDragStart={(e) => setDragData(e, symbol)}
           >
             <svg
               width={width}
