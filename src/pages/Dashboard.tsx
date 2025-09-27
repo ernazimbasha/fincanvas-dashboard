@@ -12,6 +12,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { AnalysisCanvas } from "@/components/Dashboard/AnalysisCanvas";
 
 // Dashboard Components
 import { PortfolioOverview } from "@/components/Dashboard/PortfolioOverview";
@@ -505,16 +507,24 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Bottom Section with Resizable Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Positions Table */}
           <div className="lg:col-span-2">
             <PositionsTable positions={positions || []} />
           </div>
           
-          {/* Candlestick Chart */}
-          <div className="lg:col-span-1">
-            <CandlestickChart symbol={selectedSymbol} />
+          {/* Chart and Canvas Section */}
+          <div className="lg:col-span-1 h-[500px]">
+            <ResizablePanelGroup direction="vertical" className="h-full">
+              <ResizablePanel defaultSize={60} minSize={30}>
+                <CandlestickChart symbol={selectedSymbol} />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={40} minSize={30}>
+                <AnalysisCanvas selectedSymbol={selectedSymbol} />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         </div>
 
