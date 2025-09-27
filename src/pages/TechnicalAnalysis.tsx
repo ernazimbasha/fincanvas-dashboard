@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalysisCanvas } from '@/components/Dashboard/AnalysisCanvas';
 import { ChatBot } from '@/components/Dashboard/ChatBot';
 import { InteractiveStockChart } from '@/components/Dashboard/InteractiveStockChart';
@@ -253,6 +254,17 @@ export default function TechnicalAnalysis() {
             >
               <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardContent className="p-6">
+                  <Alert className="mb-4 bg-white/10 border-white/20 text-white">
+                    <AlertTitle className="text-white font-semibold">How to use AI overlays</AlertTitle>
+                    <AlertDescription className="text-white/80 text-sm">
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>Search a symbol (e.g., AAPL) above or in the sidebar.</li>
+                        <li>Use the toolbar: select "Trendline", draw a line connecting two lows.</li>
+                        <li>In the "Ask AI" input (above the canvas), type: "Is this a support level?" → A shaded support zone appears with a note.</li>
+                        <li>Then ask: "Add the 20-day moving average." → "20MA" pills appear near tickers with an explanation.</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
                   <div className="h-[65vh]">
                     <AnalysisCanvas selectedSymbol={symbol} />
                   </div>
