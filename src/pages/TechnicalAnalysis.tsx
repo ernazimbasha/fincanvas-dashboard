@@ -275,18 +275,23 @@ export default function TechnicalAnalysis() {
                     key={news.id}
                     whileHover={{ scale: 1.02, y: -2 }}
                     transition={{ duration: 0.2 }}
+                    className="group block"
                   >
-                    <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-lg hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden">
+                    <Card className="rounded-xl bg-white/5 backdrop-blur-md border-white/10 ring-1 ring-white/10 hover:ring-purple-400/30 shadow-lg hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden">
                       <div className="relative">
                         <AspectRatio ratio={16 / 9}>
                           <img
                             src={news.image}
                             alt={news.headline}
-                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src =
+                                'https://placehold.co/600x338/png?text=News';
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                           <Badge
-                            className="absolute top-3 left-3 bg-emerald-500/90 text-white border-0"
+                            className="absolute top-3 left-3 bg-emerald-500/90 text-white border-0 shadow-sm"
                           >
                             {news.category}
                           </Badge>
@@ -294,7 +299,7 @@ export default function TechnicalAnalysis() {
                       </div>
 
                       <CardContent className="p-4 space-y-3">
-                        <h3 className="font-semibold text-white text-sm leading-tight">
+                        <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2">
                           {news.headline}
                         </h3>
 
@@ -336,22 +341,22 @@ export default function TechnicalAnalysis() {
                       key={a.id}
                       whileHover={{ scale: 1.02, y: -2 }}
                       transition={{ duration: 0.2 }}
-                      className="block"
+                      className="group block"
                     >
-                      <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-lg hover:shadow-xl hover:shadow-emerald-500/15 transition-all duration-300 overflow-hidden">
+                      <Card className="rounded-xl bg-white/5 backdrop-blur-md border-white/10 ring-1 ring-white/10 hover:ring-emerald-400/30 shadow-lg hover:shadow-xl hover:shadow-emerald-500/15 transition-all duration-300 overflow-hidden">
                         <div className="relative">
                           <AspectRatio ratio={16 / 9}>
                             <img
                               src={a.image}
                               alt={a.title}
-                              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               onError={(e) => {
                                 (e.currentTarget as HTMLImageElement).src =
                                   'https://placehold.co/800x450/png?text=Article';
                               }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                            <Badge className="absolute top-3 left-3 bg-purple-500/90 text-white border-0">
+                            <Badge className="absolute top-3 left-3 bg-purple-500/90 text-white border-0 shadow-sm">
                               {a.category}
                             </Badge>
                             <Badge className="absolute top-3 right-3 bg-white/10 text-white border-white/20">
@@ -361,7 +366,7 @@ export default function TechnicalAnalysis() {
                         </div>
                         <CardContent className="p-4 space-y-2">
                           <div className="text-white/60 text-xs">{a.source}</div>
-                          <h4 className="font-semibold text-white text-sm leading-tight">
+                          <h4 className="font-semibold text-white text-sm leading-tight line-clamp-2">
                             {a.title}
                           </h4>
                           <p className="text-white/70 text-xs leading-relaxed">
