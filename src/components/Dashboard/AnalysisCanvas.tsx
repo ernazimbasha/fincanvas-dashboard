@@ -136,33 +136,87 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
   // Handle drop on canvas
   const handleCanvasDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    if (!draggedTicker || !canvasRef.current) return;
+    if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const symbolData = MOCK_SYMBOLS.find(s => s.symbol === draggedTicker);
+    // Support both internal drag (from suggestions) and external drag (from chart)
+    const symbolFromDnD = e.dataTransfer.getData('text/symbol');
+    const symbolToAdd = draggedTicker || (symbolFromDnD ? symbolFromDnD.toUpperCase() : null);
+    if (!symbolToAdd) return;
+
+    const symbolData = MOCK_SYMBOLS.find(s => s.symbol === symbolToAdd);
     if (symbolData) {
       const newNode: TickerNode = {
         id: `ticker-${Date.now()}`,
-        symbol: draggedTicker,
+        symbol: symbolToAdd,
         x,
         y,
         price: symbolData.price,
         change: symbolData.change
       };
       setTickerNodes(prev => [...prev, newNode]);
-      toast.success(`Added ${draggedTicker} to canvas`);
+      toast.success(`Added ${symbolToAdd} to canvas`);
     }
     setDraggedTicker(null);
   }, [draggedTicker]);
 
-  // Update: handleMouseDown to support selecting/moving annotations
+  // Update: handleMouseDown to support selecting/moving annotations and erasing
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // New: Eraser behavior
+    if (activeTool === 'eraser') {
+      // Try erase annotation by hit-test
+      const hitAnnIndex = [...annotations]
+        .reverse()
+        .findIndex((ann) => {
+          if (ann.points.length < 1) return false;
+          const xs = ann.points.map(p => p.x);
+          const ys = ann.points.map(p => p.y);
+          const minX = Math.min(...xs) - 6;
+          const maxX = Math.max(...xs) + 6;
+          const minY = Math.min(...ys) - 6;
+          const maxY = Math.max(...ys) + 6;
+          return x >= minX && x <= maxX && y >= minY && y <= maxY;
+        });
+      if (hitAnnIndex !== -1) {
+        // Convert reverse index to forward index
+        const annIndex = annotations.length - 1 - hitAnnIndex;
+        setAnnotations(prev => prev.filter((_, i) => i !== annIndex));
+        toast.success('Annotation erased');
+        return;
+      }
+      // Try erase AI overlay by simple bounds
+      const overlayIndex = [...aiOverlays]
+        .reverse()
+        .findIndex((ov) => {
+          if (ov.type === 'highlight' && ov.width && ov.height) {
+            return x >= ov.x && x <= ov.x + ov.width && y >= ov.y && y <= ov.y + ov.height;
+          }
+          if ((ov.type === 'ma' || ov.type === 'rsi') && ov.text) {
+            const w = 50, h = 16;
+            return x >= ov.x - 5 && x <= ov.x - 5 + w && y >= ov.y - 8 && y <= ov.y - 8 + h;
+          }
+          if (ov.type === 'note' && ov.text) {
+            const w = Math.max(160, ov.text.length * 6), h = 24;
+            return x >= ov.x - 6 && x <= ov.x - 6 + w && y >= ov.y - 14 && y <= ov.y - 14 + h;
+          }
+          return false;
+        });
+      if (overlayIndex !== -1) {
+        const idx = aiOverlays.length - 1 - overlayIndex;
+        setAiOverlays(prev => prev.filter((_, i) => i !== idx));
+        toast.success('Overlay erased');
+        return;
+      }
+      // Nothing hit, do nothing
+      return;
+    }
 
     if (activeTool === 'select') {
       // Simple hit-test: check if click is near any annotation's bounding region
