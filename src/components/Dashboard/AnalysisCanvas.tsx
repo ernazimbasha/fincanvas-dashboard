@@ -39,7 +39,7 @@ interface Annotation {
 
 interface AIOverlay {
   id: string;
-  type: 'highlight' | 'ma' | 'rsi';
+  type: 'highlight' | 'ma' | 'rsi' | 'note';
   x: number;
   y: number;
   width?: number;
@@ -258,53 +258,145 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
   const handleAIQuestion = () => {
     if (!aiQuestion.trim()) return;
 
-    // Simulate AI response with overlays
+    const t = aiQuestion.trim().toLowerCase();
+
+    // Helper: find the latest line/trendline annotation
+    const latestLine =
+      [...annotations].reverse().find((ann) => ann.type === 'trendline' || ann.type === 'line') ||
+      null;
+
+    // If asking about support, highlight zone around the latest trendline/line
+    if (t.includes('support')) {
+      if (!latestLine || latestLine.points.length < 2) {
+        toast.error('Draw a trendline first, then ask about support.');
+        return;
+      }
+
+      const xs = latestLine.points.map((p) => p.x);
+      const ys = latestLine.points.map((p) => p.y);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      const zonePaddingX = 24;
+      const zonePaddingY = 18;
+      const zone: AIOverlay = {
+        id: `ai-support-${Date.now()}`,
+        type: 'highlight',
+        x: minX - zonePaddingX,
+        y: Math.min(minY, maxY) - zonePaddingY,
+        width: (maxX - minX) + zonePaddingX * 2,
+        height: Math.max(24, Math.abs(maxY - minY) + zonePaddingY * 2),
+        text: 'AI: Support Zone',
+      };
+
+      // Add a small explanatory note near the zone
+      const note: AIOverlay = {
+        id: `ai-note-${Date.now()}`,
+        type: 'note',
+        x: zone.x + 8,
+        y: zone.y - 10,
+        text: 'Support identified around your trendline (demo).',
+      };
+
+      setAiOverlays((prev) => [...prev, zone, note]);
+      toast.success('Confirmed: This region looks like support (demo).');
+      setAiQuestion('');
+      return;
+    }
+
+    // If asking to add 20-day moving average
+    if (
+      t.includes('20-day moving average') ||
+      t.includes('20 day moving average') ||
+      t.includes('20ma') ||
+      t.includes('ma 20') ||
+      t.includes('add the 20-day moving average')
+    ) {
+      const overlays: AIOverlay[] = [];
+
+      // Add MA pill overlays near each ticker
+      tickerNodes.forEach((node) => {
+        overlays.push({
+          id: `ai-ma-${node.id}-${Date.now()}`,
+          type: 'ma',
+          x: node.x + 80,
+          y: node.y - 10,
+          text: '20MA',
+        });
+      });
+
+      // Add a note explaining relevance
+      overlays.push({
+        id: `ai-note-ma-${Date.now()}`,
+        type: 'note',
+        x: 16,
+        y: 24,
+        text: '20MA added: quick trend gauge; crosses can hint momentum shifts (demo).',
+      });
+
+      if (overlays.length === 1) {
+        // only note was added (no tickers on canvas)
+        toast.success('20-day MA ready (place a ticker on canvas to view MA pill).');
+      } else {
+        toast.success('20-day moving average overlayed (demo).');
+      }
+
+      setAiOverlays((prev) => [...prev, ...overlays]);
+      setAiQuestion('');
+      return;
+    }
+
+    // Default behavior: simple generic analysis with lightweight overlays
     const responses = [
       "This trendline shows strong support at current levels. Volume confirmation needed.",
       "RSI indicates oversold conditions. Consider entry points near support.",
       "Moving average convergence suggests bullish momentum building.",
-      "Price action near resistance. Watch for breakout with volume."
+      "Price action near resistance. Watch for breakout with volume.",
     ];
-
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    
-    // Add AI overlays
+
     const newOverlays: AIOverlay[] = [];
-    
+
     // Add highlight zones near annotations
-    annotations.forEach(ann => {
+    annotations.forEach((ann) => {
       if (ann.type === 'trendline' || ann.type === 'line') {
         newOverlays.push({
           id: `ai-highlight-${Date.now()}`,
           type: 'highlight',
-          x: Math.min(...ann.points.map(p => p.x)) - 20,
-          y: Math.min(...ann.points.map(p => p.y)) - 10,
-          width: Math.abs(Math.max(...ann.points.map(p => p.x)) - Math.min(...ann.points.map(p => p.x))) + 40,
+          x: Math.min(...ann.points.map((p) => p.x)) - 20,
+          y: Math.min(...ann.points.map((p) => p.y)) - 10,
+          width:
+            Math.abs(
+              Math.max(...ann.points.map((p) => p.x)) -
+              Math.min(...ann.points.map((p) => p.x))
+            ) + 40,
           height: 20,
-          text: 'AI: Support Level'
+          text: 'AI: Support Level',
         });
       }
     });
 
     // Add MA and RSI for ticker nodes
-    tickerNodes.forEach(node => {
+    tickerNodes.forEach((node) => {
       newOverlays.push({
         id: `ai-ma-${node.id}`,
         type: 'ma',
         x: node.x + 80,
         y: node.y - 10,
-        text: '20MA'
+        text: '20MA',
       });
       newOverlays.push({
         id: `ai-rsi-${node.id}`,
         type: 'rsi',
         x: node.x + 80,
         y: node.y + 20,
-        text: 'RSI: 45'
+        text: 'RSI: 45',
       });
     });
 
-    setAiOverlays(prev => [...prev, ...newOverlays]);
+    setAiOverlays((prev) => [...prev, ...newOverlays]);
     toast.success(randomResponse);
     setAiQuestion('');
   };
@@ -634,6 +726,28 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
                     >
                       {overlay.text}
                     </text>
+                  )}
+                  {/* New: note overlay */}
+                  {overlay.type === 'note' && overlay.text && (
+                    <g>
+                      <rect
+                        x={overlay.x - 6}
+                        y={overlay.y - 14}
+                        width={Math.max(160, overlay.text.length * 6)}
+                        height={24}
+                        fill="rgba(17, 24, 39, 0.85)"
+                        stroke="rgba(255,255,255,0.15)"
+                        rx="6"
+                      />
+                      <text
+                        x={overlay.x + 4}
+                        y={overlay.y + 2}
+                        fill="#ffffff"
+                        fontSize="11"
+                      >
+                        {overlay.text}
+                      </text>
+                    </g>
                   )}
                 </motion.g>
               ))}
