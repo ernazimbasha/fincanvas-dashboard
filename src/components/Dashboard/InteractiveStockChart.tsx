@@ -161,6 +161,12 @@ export function InteractiveStockChart({
   const minP = Math.min(...prices);
   const rangeP = maxP - minP || 1;
 
+  // Add price change over the current view window
+  const firstClose = view[0]?.c ?? 0;
+  const lastClose = view[view.length - 1]?.c ?? 0;
+  const priceChangeAbs = lastClose - firstClose;
+  const priceChangePct = firstClose ? (priceChangeAbs / firstClose) * 100 : 0;
+
   const xScale = (i: number) => padding.left + (i * innerW) / Math.max(1, view.length - 1);
   const yScale = (p: number) => padding.top + (innerH - ((p - minP) / rangeP) * innerH);
 
@@ -369,24 +375,62 @@ export function InteractiveStockChart({
           </div>
 
           {/* stats row */}
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+            {/* Price Changes (over current view window) */}
+            <div className="rounded-md bg-white/5 p-2 border border-white/10">
+              <div className="text-white/60">Price Change</div>
+              <div className={`text-white font-medium ${priceChangeAbs >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+                ${priceChangeAbs.toFixed(2)} ({priceChangePct >= 0 ? "+" : ""}{priceChangePct.toFixed(2)}%)
+              </div>
+            </div>
+
+            {/* Volatility (σ, 20d annualized) */}
             <div className="rounded-md bg-white/5 p-2 border border-white/10">
               <div className="text-white/60">Volatility (σ, 20d)</div>
               <div className="text-white font-medium">{(volStd * 100).toFixed(2)}%</div>
             </div>
+
+            {/* Moving Averages */}
+            <div className="rounded-md bg-white/5 p-2 border border-white/10">
+              <div className="text-white/60">MA20 / MA50</div>
+              <div className="text-white font-medium">
+                {(() => {
+                  const latestT = view[view.length - 1]?.t;
+                  const m20 = latestT ? sma20.find(pt => pt.t === latestT)?.v : undefined;
+                  const m50 = latestT ? sma50.find(pt => pt.t === latestT)?.v : undefined;
+                  return `${m20 ? m20.toFixed(2) : "-" } / ${m50 ? m50.toFixed(2) : "-"}`;
+                })()}
+              </div>
+            </div>
+
+            {/* RSI (latest) */}
+            <div className="rounded-md bg-white/5 p-2 border border-white/10">
+              <div className="text-white/60">RSI (14)</div>
+              <div className="text-white font-medium">
+                {(() => {
+                  const latestT = view[view.length - 1]?.t;
+                  const r = latestT ? rsi.find(pt => pt.t === latestT)?.v : undefined;
+                  return r !== undefined ? r.toFixed(1) : "-";
+                })()}
+              </div>
+            </div>
+
+            {/* Daily Return (latest) */}
+            <div className="rounded-md bg-white/5 p-2 border border-white/10">
+              <div className="text-white/60">Daily Return</div>
+              <div className="text-white font-medium">
+                {(() => {
+                  const latestT = view[view.length - 1]?.t;
+                  const ret = latestT ? dailyReturns.find(pt => pt.t === latestT)?.v : undefined;
+                  return ret !== undefined ? `${ret >= 0 ? "+" : ""}${ret.toFixed(2)}%` : "-";
+                })()}
+              </div>
+            </div>
+
+            {/* Sharpe Ratio (demo) */}
             <div className="rounded-md bg-white/5 p-2 border border-white/10">
               <div className="text-white/60">Sharpe (demo)</div>
               <div className="text-white font-medium">{sharpe.toFixed(2)}</div>
-            </div>
-            <div className="rounded-md bg-white/5 p-2 border border-white/10">
-              <div className="text-white/60">Range</div>
-              <div className="text-white font-medium">
-                ${minP.toFixed(2)} – ${maxP.toFixed(2)}
-              </div>
-            </div>
-            <div className="rounded-md bg-white/5 p-2 border border-white/10">
-              <div className="text-white/60">Zoom / Pan</div>
-              <div className="text-white font-medium">x{zoom.toFixed(1)} / {pan.toFixed(2)}</div>
             </div>
           </div>
 
