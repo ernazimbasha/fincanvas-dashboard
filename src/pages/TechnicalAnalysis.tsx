@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { AnalysisCanvas } from '@/components/Dashboard/AnalysisCanvas';
 import { ChatBot } from '@/components/Dashboard/ChatBot';
+import { InteractiveStockChart } from '@/components/Dashboard/InteractiveStockChart';
 
 const MOCK_NEWS = [
   {
@@ -69,6 +70,9 @@ const MOCK_NEWS = [
 export default function TechnicalAnalysis() {
   const navigate = useNavigate();
   const [expandedNews, setExpandedNews] = useState<number | null>(null);
+  const [symbol, setSymbol] = useState<string>('AAPL');
+  const [timeframe, setTimeframe] = useState<'D' | 'W' | 'M'>('D');
+  const [search, setSearch] = useState<string>('');
 
   const toggleNewsExpansion = (id: number) => {
     setExpandedNews(expandedNews === id ? null : id);
@@ -92,6 +96,27 @@ export default function TechnicalAnalysis() {
               Technical Analysis
             </div>
           </nav>
+
+          <div className="mt-6">
+            <div className="text-xs text-white/60 mb-2">Quick Search</div>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && search.trim()) {
+                  setSymbol(search.trim().toUpperCase());
+                }
+              }}
+              placeholder="e.g., AAPL, MSFT"
+              className="w-full px-3 py-2 rounded-md bg-white/10 border border-white/20 text-white placeholder:text-white/60"
+            />
+            <button
+              onClick={() => search.trim() && setSymbol(search.trim().toUpperCase())}
+              className="mt-2 w-full rounded-md bg-gradient-to-r from-emerald-500 to-purple-600 py-2 text-sm text-white"
+            >
+              Search
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -103,42 +128,82 @@ export default function TechnicalAnalysis() {
             transition={{ duration: 0.5 }}
             className="p-6 border-b border-white/10"
           >
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="text-white/80 hover:text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <h1 className="text-2xl font-bold text-white">Technical Analysis</h1>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/dashboard')}
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+                <h1 className="text-2xl font-bold text-white">Technical Analysis</h1>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && search.trim()) {
+                      setSymbol(search.trim().toUpperCase());
+                    }
+                  }}
+                  placeholder="Search symbol (AAPL, TSLA, MSFT)"
+                  className="w-56 px-3 py-2 rounded-md bg-white/10 border border-white/20 text-white placeholder:text-white/60"
+                />
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-500 to-purple-600 text-white"
+                  onClick={() => search.trim() && setSymbol(search.trim().toUpperCase())}
+                >
+                  Load
+                </Button>
+              </div>
             </div>
           </motion.div>
 
-          {/* Canvas + Chat Panel */}
+          {/* Chart + AI Chat Panel */}
           <div className="p-6 space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
               className="grid grid-cols-1 xl:grid-cols-12 gap-6"
             >
-              {/* Centered Canvas */}
+              {/* Interactive Chart */}
               <Card className="xl:col-span-8 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardContent className="p-6">
-                  <div className="h-[65vh]">
-                    <AnalysisCanvas />
-                  </div>
+                  <InteractiveStockChart
+                    symbol={symbol}
+                    timeframe={timeframe}
+                    onTimeframeChange={(t) => setTimeframe(t)}
+                  />
                 </CardContent>
               </Card>
 
               {/* AI Chat Panel */}
               <Card className="xl:col-span-4 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardContent className="p-0">
-                  <div className="h-[65vh]">
+                  <div className="h-[360px]">
                     <ChatBot />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Analysis Canvas below chart/chat, centered */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="h-[65vh]">
+                    <AnalysisCanvas selectedSymbol={symbol} />
                   </div>
                 </CardContent>
               </Card>
