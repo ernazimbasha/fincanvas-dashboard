@@ -233,6 +233,16 @@ export default function Dashboard() {
               <Settings className="h-4 w-4" />
             </Button>
 
+            {/* Technical Analysis navigation */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10"
+              onClick={() => navigate("/technical")}
+            >
+              Technical Analysis
+            </Button>
+
             {/* Profile dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
