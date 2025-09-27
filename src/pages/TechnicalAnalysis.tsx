@@ -332,11 +332,8 @@ export default function TechnicalAnalysis() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {FEATURED_ARTICLES.map((a) => (
-                    <motion.a
+                    <motion.div
                       key={a.id}
-                      href={a.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       whileHover={{ scale: 1.02, y: -2 }}
                       transition={{ duration: 0.2 }}
                       className="block"
@@ -375,13 +372,16 @@ export default function TechnicalAnalysis() {
                               size="sm"
                               variant="ghost"
                               className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 text-xs h-7 px-2"
+                              asChild
                             >
-                              Read Article
+                              <a href={a.url} target="_blank" rel="noopener noreferrer">
+                                Read Article
+                              </a>
                             </Button>
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.a>
+                    </motion.div>
                   ))}
                 </div>
               </div>
