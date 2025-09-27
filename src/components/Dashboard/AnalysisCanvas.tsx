@@ -79,6 +79,10 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [draggedTicker, setDraggedTicker] = useState<string | null>(null);
 
+  // Add state for moving annotations
+  const [draggingAnnotationId, setDraggingAnnotationId] = useState<string | null>(null);
+  const [lastMousePos, setLastMousePos] = useState<{ x: number; y: number } | null>(null);
+
   // Filter symbols based on search
   const filteredSymbols = MOCK_SYMBOLS.filter(s => 
     s.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,6 +112,27 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
     setDraggedTicker(symbol);
   };
 
+  // Add: direct add ticker by click from suggestions
+  const handleAddTicker = (symbol: string) => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    // Drop near center for click-add
+    const x = rect.width / 2 - 60;
+    const y = rect.height / 2 - 30;
+    const symbolData = MOCK_SYMBOLS.find(s => s.symbol === symbol);
+    if (!symbolData) return;
+    const newNode: TickerNode = {
+      id: `ticker-${Date.now()}`,
+      symbol,
+      x,
+      y,
+      price: symbolData.price,
+      change: symbolData.change,
+    };
+    setTickerNodes(prev => [...prev, newNode]);
+    toast.success(`Added ${symbol} to canvas`);
+  };
+
   // Handle drop on canvas
   const handleCanvasDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -133,14 +158,38 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
     setDraggedTicker(null);
   }, [draggedTicker]);
 
-  // Handle mouse events for drawing
+  // Update: handleMouseDown to support selecting/moving annotations
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (activeTool === 'select') return;
-    
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    if (activeTool === 'select') {
+      // Simple hit-test: check if click is near any annotation's bounding region
+      const hitId = annotations
+        .slice()
+        .reverse()
+        .find((ann) => {
+          if (ann.points.length < 1) return false;
+          const xs = ann.points.map(p => p.x);
+          const ys = ann.points.map(p => p.y);
+          const minX = Math.min(...xs) - 6;
+          const maxX = Math.max(...xs) + 6;
+          const minY = Math.min(...ys) - 6;
+          const maxY = Math.max(...ys) + 6;
+          return x >= minX && x <= maxX && y >= minY && y <= maxY;
+        })?.id || null;
+
+      if (hitId) {
+        setSelectedAnnotation(hitId);
+        setDraggingAnnotationId(hitId);
+        setLastMousePos({ x, y });
+      } else {
+        setSelectedAnnotation(null);
+      }
+      return;
+    }
+    
     if (activeTool === 'pencil') {
       setIsDrawing(true);
       setCurrentPath([{ x, y }]);
@@ -154,11 +203,26 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
   };
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!isDrawing) return;
-
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // Move annotation if dragging
+    if (draggingAnnotationId && lastMousePos) {
+      const dx = x - lastMousePos.x;
+      const dy = y - lastMousePos.y;
+      setAnnotations(prev =>
+        prev.map(a =>
+          a.id === draggingAnnotationId
+            ? { ...a, points: a.points.map(p => ({ x: p.x + dx, y: p.y + dy })) }
+            : a
+        )
+      );
+      setLastMousePos({ x, y });
+      return;
+    }
+
+    if (!isDrawing) return;
 
     if (activeTool === 'pencil') {
       setCurrentPath(prev => [...prev, { x, y }]);
@@ -168,6 +232,13 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
   };
 
   const handleMouseUp = () => {
+    // Stop moving annotation
+    if (draggingAnnotationId) {
+      setDraggingAnnotationId(null);
+      setLastMousePos(null);
+      return;
+    }
+
     if (!isDrawing || currentPath.length === 0) return;
 
     const newAnnotation: Annotation = {
@@ -280,7 +351,7 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
 
   return (
     <div className="h-full flex flex-col bg-white rounded-lg border border-gray-200 shadow-lg">
-      {/* Header */}
+      {/* Header with toolbar + AI */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Analysis Canvas</h3>
@@ -316,13 +387,13 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
         <div className="flex items-center gap-1 mb-4">
           <TooltipProvider>
             {[
-              { tool: 'select' as Tool, icon: MousePointer, label: 'Select' },
+              { tool: 'select' as Tool, icon: MousePointer, label: 'Select/Move' },
               { tool: 'pencil' as Tool, icon: Pencil, label: 'Pencil' },
               { tool: 'line' as Tool, icon: Minus, label: 'Line' },
               { tool: 'trendline' as Tool, icon: Minus, label: 'Trendline' },
               { tool: 'rectangle' as Tool, icon: Square, label: 'Rectangle' },
               { tool: 'zone' as Tool, icon: Highlighter, label: 'Zone' },
-              { tool: 'eraser' as Tool, icon: Trash2, label: 'Eraser' }
+              { tool: 'eraser' as Tool, icon: Trash2, label: 'Eraser' },
             ].map(({ tool, icon: Icon, label }) => (
               <Tooltip key={tool}>
                 <TooltipTrigger asChild>
@@ -341,7 +412,7 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
         </div>
 
         {/* AI Question Input */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-4">
           <input
             value={aiQuestion}
             onChange={(e) => setAiQuestion(e.target.value)}
@@ -353,49 +424,47 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
             <Bot className="h-4 w-4" />
           </Button>
         </div>
-      </div>
 
-      <div className="flex-1 flex">
-        {/* Sidebar */}
-        <div className="w-48 border-r border-gray-200 p-3">
-          <div className="mb-3">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-              <input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search symbols..."
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-            </div>
+        {/* Stock Search Bar with autocomplete suggestions (above canvas) */}
+        <div className="relative">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search symbols (AAPL, TSLA) or company names..."
+              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
           </div>
-          
-          <div className="space-y-1">
-            {filteredSymbols.map((symbol) => (
-              <motion.div
-                key={symbol.symbol}
-                draggable
-                onDragStart={() => handleDragStart(symbol.symbol)}
-                className="p-2 bg-gray-50 rounded-md cursor-move hover:bg-gray-100 transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="flex items-center justify-between">
+          {searchTerm.trim().length > 0 && filteredSymbols.length > 0 && (
+            <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-md shadow-md max-h-56 overflow-auto">
+              {filteredSymbols.map((symbol) => (
+                <motion.div
+                  key={symbol.symbol}
+                  draggable
+                  onDragStart={() => handleDragStart(symbol.symbol)}
+                  onClick={() => handleAddTicker(symbol.symbol)}
+                  className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
                   <div>
                     <div className="font-medium text-sm text-gray-900">{symbol.symbol}</div>
-                    <div className="text-xs text-gray-500">${symbol.price}</div>
+                    <div className="text-xs text-gray-500">{symbol.name}</div>
                   </div>
                   <Badge variant={symbol.change >= 0 ? "default" : "destructive"} className="text-xs">
                     {symbol.change >= 0 ? '+' : ''}{symbol.change.toFixed(2)}%
                   </Badge>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Canvas */}
-        <div className="flex-1 relative">
+      {/* Centered Canvas */}
+      <div className="flex-1 flex items-center justify-center p-3">
+        <div className="w-full h-full">
           <svg
             ref={canvasRef}
             className="w-full h-full cursor-crosshair"
@@ -427,6 +496,8 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
                     transition={{ duration: 0.5 }}
+                    onClick={() => setSelectedAnnotation(annotation.id)}
+                    className="cursor-pointer"
                   />
                 )}
                 {(annotation.type === 'line' || annotation.type === 'trendline') && annotation.points.length >= 2 && (
@@ -579,7 +650,7 @@ export function AnalysisCanvas({ selectedSymbol }: AnalysisCanvasProps) {
                   transition={{ duration: 0.3 }}
                 >
                   <foreignObject x={node.x} y={node.y} width="120" height="60">
-                    <Card className="w-full h-full shadow-lg border-2 border-blue-200">
+                    <Card className="w-full h-full shadow-lg border-2 border-blue-200 hover:border-blue-300 transition-colors">
                       <CardContent className="p-2">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-sm text-gray-900">{node.symbol}</span>
