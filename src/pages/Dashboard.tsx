@@ -514,19 +514,27 @@ export default function Dashboard() {
             <PositionsTable positions={positions || []} />
           </div>
           
-          {/* Chart and Canvas Section */}
+          {/* Chart Section (removed embedded canvas, keep only chart) */}
           <div className="lg:col-span-1 h-[500px]">
-            <ResizablePanelGroup direction="vertical" className="h-full">
-              <ResizablePanel defaultSize={60} minSize={30}>
-                <CandlestickChart symbol={selectedSymbol} />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={40} minSize={30}>
-                <AnalysisCanvas selectedSymbol={selectedSymbol} />
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <CandlestickChart symbol={selectedSymbol} />
           </div>
         </div>
+
+        {/* Centered Analysis Canvas Section (full width below portfolio) */}
+        <section className="mt-6">
+          <div className="max-w-6xl mx-auto">
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-base">Analysis Canvas</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="h-[65vh]">
+                  <AnalysisCanvas selectedSymbol={selectedSymbol} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
         {/* Research & Insights Section */}
         <section className="mt-6 grid grid-cols-1 xl:grid-cols-5 gap-6">
