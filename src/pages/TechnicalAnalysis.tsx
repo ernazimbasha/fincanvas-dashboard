@@ -67,6 +67,57 @@ const MOCK_NEWS = [
   }
 ];
 
+const FEATURED_ARTICLES = [
+  {
+    id: 'fa1',
+    category: 'AI & Quant',
+    title: 'How AI is Changing Technical Analysis: From Signals to Context',
+    blurb:
+      'A practical overview of how machine learning and LLMs augment classic TA—support/resistance, regime detection, and signal validation.',
+    image:
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop',
+    source: 'FinCanvas Reads',
+    readTime: '7 min',
+    url: 'https://www.investopedia.com/artificial-intelligence-ai-in-trading-5211480',
+  },
+  {
+    id: 'fa2',
+    category: 'Markets',
+    title: 'Volatility 101: Using Standard Deviation in Your Playbook',
+    blurb:
+      'Understand volatility the right way—how to measure it, annualize it, and apply it to position sizing and risk.',
+    image:
+      'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=800&h=450&fit=crop',
+    source: 'Market Primer',
+    readTime: '6 min',
+    url: 'https://www.investopedia.com/terms/v/volatility.asp',
+  },
+  {
+    id: 'fa3',
+    category: 'Strategy',
+    title: 'Moving Averages: Beyond Crossovers to Regime Detection',
+    blurb:
+      'Go deeper than MA crossovers—learn about dynamic windows, trend strength, and when MAs matter most.',
+    image:
+      'https://images.unsplash.com/photo-1508385082359-f38ae991e8f2?w=800&h=450&fit=crop',
+    source: 'Strategy Notes',
+    readTime: '5 min',
+    url: 'https://www.investopedia.com/terms/m/movingaverage.asp',
+  },
+  {
+    id: 'fa4',
+    category: 'Indicators',
+    title: 'RSI in Context: Momentum, Divergences, and Traps',
+    blurb:
+      'RSI is more than 70/30—learn how to read momentum shifts, find divergences, and avoid common traps.',
+    image:
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop',
+    source: 'Indicator Guide',
+    readTime: '8 min',
+    url: 'https://www.investopedia.com/terms/r/rsi.asp',
+  },
+];
+
 export default function TechnicalAnalysis() {
   const navigate = useNavigate();
   const [expandedNews, setExpandedNews] = useState<number | null>(null);
@@ -272,6 +323,67 @@ export default function TechnicalAnalysis() {
                     </Card>
                   </motion.div>
                 ))}
+              </div>
+
+              {/* Featured Articles to Read */}
+              <div className="pt-2">
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Featured Articles to Read
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {FEATURED_ARTICLES.map((a) => (
+                    <motion.a
+                      key={a.id}
+                      href={a.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      transition={{ duration: 0.2 }}
+                      className="block"
+                    >
+                      <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-lg hover:shadow-xl hover:shadow-emerald-500/15 transition-all duration-300 overflow-hidden">
+                        <div className="relative">
+                          <AspectRatio ratio={16 / 9}>
+                            <img
+                              src={a.image}
+                              alt={a.title}
+                              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src =
+                                  'https://placehold.co/800x450/png?text=Article';
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <Badge className="absolute top-3 left-3 bg-purple-500/90 text-white border-0">
+                              {a.category}
+                            </Badge>
+                            <Badge className="absolute top-3 right-3 bg-white/10 text-white border-white/20">
+                              {a.readTime}
+                            </Badge>
+                          </AspectRatio>
+                        </div>
+                        <CardContent className="p-4 space-y-2">
+                          <div className="text-white/60 text-xs">{a.source}</div>
+                          <h4 className="font-semibold text-white text-sm leading-tight">
+                            {a.title}
+                          </h4>
+                          <p className="text-white/70 text-xs leading-relaxed">
+                            {a.blurb}
+                          </p>
+                          <div className="pt-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 text-xs h-7 px-2"
+                            >
+                              Read Article
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.a>
+                  ))}
+                </div>
               </div>
             </motion.div>
           </div>
