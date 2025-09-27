@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { AnalysisCanvas } from "@/components/Dashboard/AnalysisCanvas";
 
 // Dashboard Components
 import { PortfolioOverview } from "@/components/Dashboard/PortfolioOverview";
@@ -529,22 +528,6 @@ export default function Dashboard() {
             <CandlestickChart symbol={selectedSymbol} />
           </div>
         </div>
-
-        {/* Centered Analysis Canvas Section (full width below portfolio) */}
-        <section className="mt-6">
-          <div className="max-w-6xl mx-auto">
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white text-base">Analysis Canvas</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="h-[65vh]">
-                  <AnalysisCanvas selectedSymbol={selectedSymbol} />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
 
         {/* Research & Insights Section */}
         <section className="mt-6 grid grid-cols-1 xl:grid-cols-5 gap-6">
