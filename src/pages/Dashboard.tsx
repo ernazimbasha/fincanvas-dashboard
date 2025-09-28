@@ -472,18 +472,53 @@ export default function Dashboard() {
                 {searchResults.map((r) => (
                   <div
                     key={r.symbol}
-                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer"
+                    className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 hover:bg-white/10 hover:border-white/20 hover:shadow-md transition-all cursor-pointer group"
                     onClick={() => { setSelectedSearch(r); setSearchDetailOpen(true); }}
                   >
-                    <div>
-                      <div className="text-white font-semibold">{r.symbol}</div>
-                      <div className="text-xs text-white/60">{r.name}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-white">${r.price.toFixed(2)}</div>
-                      <div className={`text-xs ${r.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {(r.change >= 0 ? "+" : "") + r.change.toFixed(2)}%
+                    {/* Top row: Symbol chip + Price */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-[11px] font-semibold rounded-md bg-white/10 text-white">
+                          {r.symbol}
+                        </span>
+                        <span className="text-xs text-white/60">{r.name}</span>
                       </div>
+                      <div className="text-right">
+                        <div className="text-sm text-white">${r.price.toFixed(2)}</div>
+                      </div>
+                    </div>
+
+                    {/* Middle: Sparkline */}
+                    <div className="mt-2">
+                      <svg width="100%" height="36" viewBox="0 0 200 36" className="opacity-90">
+                        {/* baseline */}
+                        <line x1="0" y1="28" x2="200" y2="28" stroke="rgba(255,255,255,0.08)" />
+                        {/* sparkline (demo shape varies a bit based on sign) */}
+                        <polyline
+                          fill="none"
+                          stroke={r.change >= 0 ? "#10b981" : "#ef4444"}
+                          strokeWidth="2"
+                          points={
+                            r.change >= 0
+                              ? "0,30 20,29 40,28 60,26 80,24 100,22 120,21 140,20 160,19 180,18 200,17"
+                              : "0,18 20,19 40,20 60,22 80,24 100,26 120,27 140,28 160,29 180,30 200,31"
+                          }
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Bottom: Change badge */}
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className={`text-xs rounded-md px-2 py-0.5 ${
+                        r.change >= 0
+                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/20"
+                          : "bg-red-500/15 text-red-300 border border-red-400/20"
+                      }`}>
+                        {(r.change >= 0 ? "+" : "") + r.change.toFixed(2)}%
+                      </span>
+                      <span className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors">
+                        View details
+                      </span>
                     </div>
                   </div>
                 ))}
